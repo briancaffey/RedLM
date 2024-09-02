@@ -55,15 +55,12 @@
             <div class="hidden sm:block sm:ml-6">
               <div class="flex space-x-4">
                 <!-- Navigation links -->
-                <a href="#" class="bg-gray-900 text-white px-3 py-2 rounded-md text-sm font-medium">
+                <nuxt-link to="/" class="bg-gray-900 text-white px-3 py-2 rounded-md text-sm font-medium">
                   红 LLM
-                </a>
-                <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
-                  Team
-                </a>
-                <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                </nuxt-link>
+                <nuxt-link to="/about" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
                   About
-                </a>
+                </nuxt-link>
               </div>
             </div>
           </div>
@@ -77,9 +74,6 @@
             红LLM
           </a>
           <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">
-            Team
-          </a>
-          <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">
             About
           </a>
         </div>
@@ -88,7 +82,7 @@
 
     <!-- Main Content -->
     <main class="flex-grow bg-gray-100 p-4">
-      <router-view></router-view>
+      <NuxtPage />
     </main>
 
     <!-- Footer (optional) -->
