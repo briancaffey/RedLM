@@ -1,2 +1,1 @@
-# HLLM
-Hong Lou Language Model
+# RedLLM
