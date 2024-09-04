@@ -11,10 +11,9 @@ app = FastAPI()
 
 # Load model and processor
 model = Qwen2VLForConditionalGeneration.from_pretrained(
-    "Qwen/Qwen2-VL-7B-Instruct", torch_dtype="auto", device_map="auto"
-)
-model.to("cuda")
-processor = AutoProcessor.from_pretrained("Qwen/Qwen2-VL-7B-Instruct")
+    "Qwen/Qwen2-VL-2B-Instruct", torch_dtype="auto"
+).to("cuda")
+processor = AutoProcessor.from_pretrained("Qwen/Qwen2-VL-2B-Instruct")
 
 class InferenceRequest(BaseModel):
     prompt: str
