@@ -1,7 +1,11 @@
 <template>
-  <div v-if="chapterData" class="mx-auto max-w-5xl px-2 sm:px-4 md:px-4 lg:px-16 mt-4">
-    <div v-for="(paragraph, index) in chapterData.paragraphs" :key="index">
-      <p class="py-2">{{ paragraph.original }}</p>
+  <div v-if="chapterData">
+    <h2  class="text-center text-2xl font-medium">{{ chapterData.title }}</h2>
+    <div><NuxtImg src="/img/002.png" quality="60" /></div>
+    <div class="mx-auto max-w-5xl px-2 sm:px-4 md:px-4 lg:px-16 mt-4">
+      <div v-for="(paragraph, index) in chapterData.paragraphs" :key="index">
+        <p class="py-2">{{ paragraph.original }}</p>
+      </div>
     </div>
   </div>
   <div v-else>

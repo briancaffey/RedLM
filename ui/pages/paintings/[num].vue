@@ -20,6 +20,9 @@
 
 <script>
 import { ref, onMounted, computed } from 'vue';
+import { useRoute } from 'vue-router'
+
+
 
 export default {
   name: 'ImageSelector',
@@ -34,9 +37,12 @@ export default {
     const selectedAreaDataUrl = ref('');
     const scale = ref(1);
 
+    const route = useRoute()
+    const imgNum = route.params.num
+
     const loadImage = () => {
       image.value = new Image();
-      image.value.src = '/img/009.png'; // Replace with your image path
+      image.value.src = `/img/${imgNum}.png`; // Replace with your image path
       image.value.onload = () => {
         calculateScale();
         canvas.value.width = image.value.width * scale.value;
