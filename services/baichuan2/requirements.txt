@@ -1,0 +1,9 @@
+fastapi[standard]
+uvicorn
+torch
+transformers
+pydantic
+sentencepiece
+accelerate
+bitsandbytes
+requests
