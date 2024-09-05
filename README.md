@@ -19,5 +19,5 @@ docker run --runtime nvidia --gpus all \
     -p 8000:8000 \
     --ipc=host \
     vllm/vllm-openai:latest \
-    --model 01-ai/Yi-1.5-6B-Chat --trust-remote-code
+    --model 01-ai/Yi-1.5-9B-Chat --trust-remote-code
 ```
