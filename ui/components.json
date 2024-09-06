@@ -2,11 +2,11 @@
   "$schema": "https://shadcn-vue.com/schema.json",
   "style": "default",
   "typescript": true,
-  "tsConfigPath": ".nuxt/tsconfig.json",
+  "tsConfigPath": "tsconfig.json",
   "tailwind": {
     "config": "tailwind.config.js",
     "css": "assets/css/tailwind.css",
-    "baseColor": "stone",
+    "baseColor": "slate",
     "cssVariables": true
   },
   "framework": "nuxt",
