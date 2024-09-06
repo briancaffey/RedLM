@@ -46,21 +46,14 @@ for i, p in enumerate(paragraphs):
     )
     documents.append(document)
 
-    # print(
-    #     "The LLM sees this: \n",
-    #     document.get_content(metadata_mode=MetadataMode.LLM),
-    # )
-    # print(
-    #     "The Embedding model sees this: \n",
-    #     document.get_content(metadata_mode=MetadataMode.EMBED),
-    # )
-
 index = VectorStoreIndex.from_documents(documents)
 
 query_engine = index.as_query_engine()
 
 # answer is 《好了歌》
 QUERY = "士隐的歌叫什么？"
+response = query_engine.query(QUERY)
+print(response)
 
 #
 print("With Context")
