@@ -38,7 +38,8 @@ def parse_html_file(filename):
             "choices": choices,
             "answer": correct_answer
         }
-        if len(answers) == 1:
+        # only include questions with one correct answer and four answer choices
+        if len(answers) == 1 and len(choices) == 4:
             questions.append(question_data)
 
     return questions

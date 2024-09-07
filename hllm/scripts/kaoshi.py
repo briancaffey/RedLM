@@ -29,7 +29,7 @@ def take_test(data):
     num_questions = len(data)
     correct = 0
 
-    for q in data:
+    for i, q in enumerate(data):
         # create a prompt to get the answer choice as a letter
         response = client.chat.completions.create(
             messages=[
@@ -51,11 +51,12 @@ def take_test(data):
 
         if q["answer"].lower() in llm_answer.lower():
             correct += 1
-            print("CORRECT")
+            print("✅")
         else:
-            print("____WRONG____")
+            print("❌")
 
-        print(correct)
+        percent = correct / (i+1)
+        print(f"{correct}/{i+1} - Score: {percent:.2f}%")
 
     print(f"Answered {correct} questions correctly out of {num_questions}")
 
