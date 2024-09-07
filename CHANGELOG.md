@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.0](https://github.com/briancaffey/HLLM/compare/v0.1.0...v0.2.0) (2024-09-07)
+
+
+### Features
+
+* **img:** rename images ([dbb7cbe](https://github.com/briancaffey/HLLM/commit/dbb7cbe7c3996e3adc60cef8bf498f63564b2fb9))
+* **ui:** add pinia for chapter store, add components on index page ([c4975ed](https://github.com/briancaffey/HLLM/commit/c4975ed3ea510245ed2aff61073865339e26d6fe))
+* **ui:** updates to UI for reading text and viewing images ([10ddabe](https://github.com/briancaffey/HLLM/commit/10ddabe39c749671e453888f30c365da67e38d3a))
+
 ## 0.1.0 (2024-09-07)
 
 
