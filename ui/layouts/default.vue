@@ -1,14 +1,14 @@
 <template>
   <div class="min-h-screen flex flex-col">
     <!-- Navigation Bar -->
-    <nav class="bg-gray-800 text-white">
+    <nav class="bg-red-800 text-white">
       <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
         <div class="relative flex items-center justify-between h-16">
           <div class="absolute inset-y-0 left-0 flex items-center sm:hidden">
             <!-- Mobile menu button-->
             <button
               type="button"
-              class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+              class="inline-flex items-center justify-center p-2 rounded-md text-red-400 hover:text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
               aria-controls="mobile-menu"
               aria-expanded="false"
             >
@@ -55,10 +55,10 @@
             <div class="hidden sm:block sm:ml-6">
               <div class="flex space-x-4">
                 <!-- Navigation links -->
-                <nuxt-link to="/" class="bg-gray-900 text-white px-3 py-2 rounded-md text-sm font-medium">
-                  红 LLM
+                <nuxt-link to="/" class="bg-red-900 text-white px-3 py-2 rounded-md text-sm font-medium">
+                  RedLM
                 </nuxt-link>
-                <nuxt-link to="/about" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                <nuxt-link to="/about" class="text-red-300 hover:bg-red-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
                   About
                 </nuxt-link>
               </div>
@@ -70,10 +70,10 @@
       <!-- Mobile menu, show/hide based on menu state. -->
       <div class="sm:hidden" id="mobile-menu">
         <div class="px-2 pt-2 pb-3 space-y-1">
-          <a href="#" class="bg-gray-900 text-white block px-3 py-2 rounded-md text-base font-medium">
-            红LLM
+          <a href="#" class="bg-red-900 text-white block px-3 py-2 rounded-md text-base font-medium">
+            RedLM
           </a>
-          <a href="#" class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">
+          <a href="#" class="text-red-300 hover:bg-red-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">
             About
           </a>
         </div>
@@ -81,13 +81,13 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="flex-grow bg-gray-100 p-4">
+    <main class="flex-grow bg-red-100 p-4">
       <NuxtPage />
     </main>
 
     <!-- Footer (optional) -->
-    <footer class="bg-gray-800 text-white text-center p-4">
-      &copy; 2024 Your Company. All rights reserved.
+    <footer class="bg-red-800 text-white text-center p-4">
+      RedLM
     </footer>
   </div>
 </template>
