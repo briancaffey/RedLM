@@ -1,7 +1,7 @@
 <template>
   <div>
     <Drawer direction="right">
-      <DrawerTrigger>Open</DrawerTrigger>
+      <DrawerTrigger>Chat</DrawerTrigger>
       <DrawerContent class="h-screen top-0 right-0 left-auto mt-0 w-[500px] rounded-none">
         <DrawerHeader>
           <DrawerTitle>Are you absolutely sure?</DrawerTitle>

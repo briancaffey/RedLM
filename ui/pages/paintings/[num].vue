@@ -42,7 +42,7 @@ export default {
 
     const loadImage = () => {
       image.value = new Image();
-      image.value.src = `/img/${imgNum}.png`; // Replace with your image path
+      image.value.src = `/img/paintings/${imgNum}.png`; // Replace with your image path
       image.value.onload = () => {
         calculateScale();
         canvas.value.width = image.value.width * scale.value;
