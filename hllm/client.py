@@ -30,9 +30,7 @@ query = """
 """
 
 # Prepare the request payload
-payload = {
-    "query": query
-}
+payload = {"query": query}
 
 # Send the POST request
 response = requests.post(url, json=payload)

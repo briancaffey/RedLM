@@ -3,8 +3,9 @@ import json
 import openai
 
 # Set the OpenAI API key
-openai.api_key = 'your-api-key-here'  # Replace with your OpenAI API key
-openai.api_base = 'http://localhost:8000/v1'  # Set to your local server
+openai.api_key = "your-api-key-here"  # Replace with your OpenAI API key
+openai.api_base = "http://localhost:8000/v1"  # Set to your local server
+
 
 def split_chinese_sentences(text):
     sentences = []
@@ -22,8 +23,15 @@ def split_chinese_sentences(text):
 
     return sentences
 
+
 def translate_chinese_paragraph(text, target):
-    return "".join([translate_text(sentence, target=target) for sentence in split_chinese_sentences(text)])
+    return "".join(
+        [
+            translate_text(sentence, target=target)
+            for sentence in split_chinese_sentences(text)
+        ]
+    )
+
 
 def translate_text(text, target):
     """
@@ -31,7 +39,7 @@ def translate_text(text, target):
     """
     client = openai.OpenAI(
         api_key=os.environ.get("OPENAI_API_KEY", "None"),
-        base_url='http://localhost:8000/v1'
+        base_url="http://localhost:8000/v1",
     )
 
     if target == "mandarin":
@@ -40,20 +48,20 @@ def translate_text(text, target):
             messages=[
                 {
                     "role": "system",
-                    "content": "您是一位中国文学学者，直接将白话文翻译成现代汉语。"
+                    "content": "您是一位中国文学学者，直接将白话文翻译成现代汉语。",
                 },
                 {
                     "role": "user",
-                    "content": "看官！你道此书从何而起？说来虽近荒唐，细玩颇有趣味。"
+                    "content": "看官！你道此书从何而起？说来虽近荒唐，细玩颇有趣味。",
                 },
                 {
                     "role": "assistant",
-                    "content": "读者朋友，你想知道这本书是怎么开始的吗？说起来虽然有些离奇，但仔细品味却很有意思。"
+                    "content": "读者朋友，你想知道这本书是怎么开始的吗？说起来虽然有些离奇，但仔细品味却很有意思。",
                 },
                 {
                     "role": "user",
                     "content": text,
-                }
+                },
             ],
             model="01-ai/Yi-1.5-6B-Chat",
         )
@@ -64,44 +72,50 @@ def translate_text(text, target):
             messages=[
                 {
                     "role": "system",
-                    "content": "You are a Chinese translator and your task is to directly translate Chinese text into English."
+                    "content": "You are a Chinese translator and your task is to directly translate Chinese text into English.",
                 },
                 {
                     "role": "user",
-                    "content": "读者朋友，你想知道这本书是怎么开始的吗？说起来虽然有些离奇，但仔细品味却很有意思。"
+                    "content": "读者朋友，你想知道这本书是怎么开始的吗？说起来虽然有些离奇，但仔细品味却很有意思。",
                 },
                 {
                     "role": "assistant",
-                    "content": "Dear reader, do you want to know how this book begins? Although the story may seem a bit strange at first, it's quite interesting when you take the time to savor it."
+                    "content": "Dear reader, do you want to know how this book begins? Although the story may seem a bit strange at first, it's quite interesting when you take the time to savor it.",
                 },
                 {
                     "role": "user",
                     "content": text,
-                }
+                },
             ],
             model="01-ai/Yi-1.5-6B-Chat",
         )
     translated_text = response.choices[0].message.content.strip()
     return translated_text
 
+
 def translate_json_file(file_path):
-    with open(file_path, 'r', encoding='utf-8') as file:
+    with open(file_path, "r", encoding="utf-8") as file:
         data = json.load(file)
 
     for paragraph in data.get("paragraphs", []):
         original_text = paragraph.get("original")
         if original_text:
-            translated_text = translate_chinese_paragraph(original_text, target="mandarin")
+            translated_text = translate_chinese_paragraph(
+                original_text, target="mandarin"
+            )
             paragraph["mandarin"] = translated_text
             print("Baihua\n")
             print(translated_text)
-            translated_english_text = translate_chinese_paragraph(translated_text, target="english")
+            translated_english_text = translate_chinese_paragraph(
+                translated_text, target="english"
+            )
             paragraph["english"] = translated_english_text
             print("English\n")
             print(translated_english_text)
 
-    with open(file_path, 'w', encoding='utf-8') as file:
+    with open(file_path, "w", encoding="utf-8") as file:
         json.dump(data, file, ensure_ascii=False, indent=4)
+
 
 def translate_directory(directory_path):
     for root, dirs, files in os.walk(directory_path):

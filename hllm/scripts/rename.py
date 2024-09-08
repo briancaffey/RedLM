@@ -1,7 +1,7 @@
 import os
 
 # Specify the folder path
-folder_path = '/home/brian/github/HLLM/hllm/data/paintings'
+folder_path = "/home/brian/github/HLLM/hllm/data/paintings"
 
 # Loop through each file in the folder
 for filename in os.listdir(folder_path):
@@ -19,4 +19,4 @@ for filename in os.listdir(folder_path):
 
     # Rename the file
     os.rename(old_file, new_file)
-    print(f'Renamed: {filename} -> {new_filename}')
+    print(f"Renamed: {filename} -> {new_filename}")
