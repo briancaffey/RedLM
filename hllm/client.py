@@ -2,10 +2,10 @@ import requests
 import json
 
 # Server URL
-url = "http://localhost:8080/query"
+url = "http://localhost:8080/q-and-a"
 
 # Sample query
-# query = "宝玉不知道以下何种农耕作物之名？"
+# query = "宝玉和谁打架？"
 # TODO: adjust RAG template
 query = """
         "question": "秦钟的父亲是如何死的？[1分]",
