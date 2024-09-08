@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.3.0](https://github.com/briancaffey/HLLM/compare/v0.2.0...v0.3.0) (2024-09-08)
+
+
+### Features
+
+* **black:** format code with black ([39c1342](https://github.com/briancaffey/HLLM/commit/39c1342ca58eedf31d80c1f48453dac11d6e2164))
+* **index:** refactor RAG server, add command to build and persist VectorIndexStore data ([62405f9](https://github.com/briancaffey/HLLM/commit/62405f94c809d1493b8be4cb78a24a023f04f431))
+
+
+### Bug Fixes
+
+* **black:** format with black ([90725e1](https://github.com/briancaffey/HLLM/commit/90725e110cd1fc4557543eee67d7652ed511a9ee))
+
 ## [0.2.0](https://github.com/briancaffey/HLLM/compare/v0.1.0...v0.2.0) (2024-09-07)
 
 
