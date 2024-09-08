@@ -5,12 +5,14 @@ Usage:
 
 python -m commands.index
 """
+
 import json
 
 from llama_index.core import Document, Settings, VectorStoreIndex
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 
 Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-zh-v1.5")
+
 
 def persist_index():
     documents = []
@@ -39,6 +41,7 @@ def persist_index():
     # Build and persist the VectorStoreIndex
     # for now, run `python -m commands.index` before running the server
     index.storage_context.persist(persist_dir="storage")
+
 
 if __name__ == "__main__":
     persist_index()
