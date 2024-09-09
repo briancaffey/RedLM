@@ -4,29 +4,31 @@ import json
 from tensorrt_llm import LLM, SamplingParams
 from tensorrt_llm.hlapi import BuildConfig
 
-# models to use
-# Qwen/Qwen2-7B-Instruct
-# baichuan-inc/Baichuan2-13B-Chat
-MODEL = "Qwen/Qwen2-7B-Instruct"
 
-# Version is "original" | "english" | "mandarin"
-VERSION = "original"
+def main():
+    # models to use
+    # Qwen/Qwen2-7B-Instruct
+    # baichuan-inc/Baichuan2-13B-Chat
+    MODEL = "Qwen/Qwen2-7B-Instruct"
 
-bh_to_zh = "把下面的白话写成用简单的现代汉语的句子：\n\n"
-zh_to_en = "Translate the following from Chinese to English:\n\n"
+    # Version is "original" | "english" | "mandarin"
+    VERSION = "original"
 
-def get_chapter_data(file_path):
-    with open(file_path, 'r', encoding='utf-8') as file:
-        data = json.load(file)
-    return data
+    bh_to_zh = "把下面的白话写成用简单的现代汉语的句子：\n\n"
+    zh_to_en = "Translate the following from Chinese to English:\n\n"
 
-sampling_params = SamplingParams(temperature=0.8, top_p=0.95, max_tokens=2048)
-build_config = BuildConfig(max_seq_len=4096)
+    def get_chapter_data(file_path):
+        with open(file_path, 'r', encoding='utf-8') as file:
+            data = json.load(file)
+        return data
 
-llm = LLM(model=MODEL, build_config=build_config)
+    sampling_params = SamplingParams(temperature=0.8, top_p=0.95, max_tokens=2048)
+    build_config = BuildConfig(max_seq_len=4096)
+
+    llm = LLM(model=MODEL, build_config=build_config, tensor_parallel_size=4)
 
 
-def translate_directory(directory_path):
+    directory_path = "data/book"
     for root, dirs, files in os.walk(directory_path):
         for file in files:
             if file.endswith(".json"):
@@ -40,12 +42,19 @@ def translate_directory(directory_path):
 
                 # bai hua to chinese
                 prompts = [f"{bh_to_zh}{p}\n\n" for p in paragraphs]
-                chinese_outputs = llm.generate(prompts, sampling_params)
+                # TODO: fix failures where context is exceeded
+                try:
+                    chinese_outputs = llm.generate(prompts, sampling_params)
+                except:
+                    continue
                 chinese_paragraphs = [output.outputs[0].text for output in chinese_outputs]
 
                 # chinese to english
                 prompts = [f"{zh_to_en}{p}\n\n" for p in chinese_paragraphs]
-                english_outputs = llm.generate(prompts, sampling_params)
+                try:
+                    english_outputs = llm.generate(prompts, sampling_params)
+                except:
+                    continue
                 english_paragraphs = [output.outputs[0].text for output in english_outputs]
 
                 # add chinese and english translations to chapter_data
@@ -61,7 +70,7 @@ def translate_directory(directory_path):
 
                 print(f"Translated: {file_path}")
 
-
-directory_to_translate = "data/book"
-translate_directory(directory_to_translate)
+# Refer to https://mpi4py.readthedocs.io/en/stable/mpi4py.futures.html#mpipoolexecutor
+if __name__ == "__main__":
+    main()
 
