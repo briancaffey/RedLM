@@ -60,8 +60,6 @@ def translate_directory(directory_path):
                     json.dump(chapter_data, file, ensure_ascii=False, indent=4)
 
                 print(f"Translated: {file_path}")
-            break
-
 
 
 directory_to_translate = "data/book"
