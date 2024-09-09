@@ -68,7 +68,7 @@ class QAndAQueryEngine(CustomQueryEngine):
             [ChatMessage(role="user", content=q_and_a_prompt.format(context_str=context_str, query_str=query_str))]
         )
 
-        return str(response)
+        return response
 
 
 def get_qa_query_engine():
