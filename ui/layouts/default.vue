@@ -61,6 +61,9 @@
                 <nuxt-link to="/about" class="text-red-300 hover:bg-red-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
                   About
                 </nuxt-link>
+                <nuxt-link to="/qa" class="text-red-300 hover:bg-red-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                  Q&A
+                </nuxt-link>
               </div>
             </div>
           </div>
