@@ -17,9 +17,11 @@
           </nuxt-link>
         </div>
       </div>
-      <div v-for="(paragraph, index) in chapterData.paragraphs" :key="index">
-        <p class="py-2">{{ paragraph.original }}</p>
-      </div>
+      <div v-for="(paragraph, index) in chapterData.paragraphs" :key="index" class="flex flex-col lg:flex-row lg:space-x-4 space-y-4 lg:space-y-0">
+  <p class="py-2 lg:w-1/3">{{ paragraph.original }}</p>
+  <p class="py-2 lg:w-1/3">{{ paragraph.chinese }}</p>
+  <p class="py-2 lg:w-1/3">{{ paragraph.english }}</p>
+</div>
     </div>
   </div>
   <div v-else>
