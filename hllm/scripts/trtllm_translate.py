@@ -18,7 +18,7 @@ def main():
     zh_to_en = "Translate the following from Chinese to English:\n\n"
 
     def get_chapter_data(file_path):
-        with open(file_path, 'r', encoding='utf-8') as file:
+        with open(file_path, "r", encoding="utf-8") as file:
             data = json.load(file)
         return data
 
@@ -26,7 +26,6 @@ def main():
     build_config = BuildConfig(max_seq_len=4096)
 
     llm = LLM(model=MODEL, build_config=build_config, tensor_parallel_size=4)
-
 
     directory_path = "data/book"
     for root, dirs, files in os.walk(directory_path):
@@ -47,7 +46,9 @@ def main():
                     chinese_outputs = llm.generate(prompts, sampling_params)
                 except:
                     continue
-                chinese_paragraphs = [output.outputs[0].text for output in chinese_outputs]
+                chinese_paragraphs = [
+                    output.outputs[0].text for output in chinese_outputs
+                ]
 
                 # chinese to english
                 prompts = [f"{zh_to_en}{p}\n\n" for p in chinese_paragraphs]
@@ -55,22 +56,26 @@ def main():
                     english_outputs = llm.generate(prompts, sampling_params)
                 except:
                     continue
-                english_paragraphs = [output.outputs[0].text for output in english_outputs]
+                english_paragraphs = [
+                    output.outputs[0].text for output in english_outputs
+                ]
 
                 # add chinese and english translations to chapter_data
                 all_paragraphs = [
                     {**og_dict, "english": en_val, "chinese": cn_val}
-                    for og_dict, en_val, cn_val in zip(chapter_paragraphs, english_paragraphs, chinese_paragraphs)
+                    for og_dict, en_val, cn_val in zip(
+                        chapter_paragraphs, english_paragraphs, chinese_paragraphs
+                    )
                 ]
 
                 chapter_data["paragraphs"] = all_paragraphs
 
-                with open(file_path, 'w', encoding='utf-8') as file:
+                with open(file_path, "w", encoding="utf-8") as file:
                     json.dump(chapter_data, file, ensure_ascii=False, indent=4)
 
                 print(f"Translated: {file_path}")
 
+
 # Refer to https://mpi4py.readthedocs.io/en/stable/mpi4py.futures.html#mpipoolexecutor
 if __name__ == "__main__":
     main()
-

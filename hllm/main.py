@@ -19,8 +19,9 @@ app.add_middleware(
     allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"]
+    allow_headers=["*"],
 )
+
 
 class QueryRequest(BaseModel):
     query: str
@@ -29,8 +30,10 @@ class QueryRequest(BaseModel):
 class QueryResponse(BaseModel):
     response: str
 
+
 class QAQueryResponse(BaseModel):
     response: str
+
 
 class MutliModalRequest(BaseModel):
     prompt: str
@@ -44,7 +47,6 @@ async def startup_event():
     q_and_a_engine = get_q_and_a_query_engine()
 
 
-
 @app.post("/query", response_model=QueryResponse)
 async def perform_query(request: QueryRequest):
     """
@@ -54,6 +56,7 @@ async def perform_query(request: QueryRequest):
     response = query_engine.query(request.query)
     return QueryResponse(response=str(response))
 
+
 @app.post("/q-and-a", response_model=QueryResponse)
 async def perform_q_and_a(request: QueryRequest):
     """
@@ -62,9 +65,11 @@ async def perform_q_and_a(request: QueryRequest):
     response = q_and_a_engine.query(request.query)
     return QAQueryResponse(response=response.message.content)
 
+
 def fix_base64_padding(data: str) -> str:
     # Add padding if necessary
     return data + "=" * ((4 - len(data) % 4) % 4)
+
 
 @app.post("/mm-q-and-a")
 async def mm_q_and_a(req_data: MutliModalRequest):
@@ -73,7 +78,9 @@ async def mm_q_and_a(req_data: MutliModalRequest):
     """
     try:
         # Fix padding if needed
-        base64_image = fix_base64_padding(req_data.image.split(",")[1])  # Ensure you only decode the base64 part
+        base64_image = fix_base64_padding(
+            req_data.image.split(",")[1]
+        )  # Ensure you only decode the base64 part
 
         # Decode the base64 image
         image_data = base64.b64decode(base64_image)
@@ -91,23 +98,23 @@ async def mm_q_and_a(req_data: MutliModalRequest):
         buffered.seek(0)  # Move the cursor to the beginning of the buffer
 
         # Prepare the data for the qwen2-vl API call
-        files = {
-            "image": ("image.png", buffered, "image/png")
-        }
-        data = {
-            "prompt": req_data.prompt
-        }
+        files = {"image": ("image.png", buffered, "image/png")}
+        data = {"prompt": req_data.prompt}
 
         # Make the API call to qwen2-vl
         qwen2_vl_url = "http://192.168.5.173:8000/inference"
-        response = requests.post(qwen2_vl_url, files=files, data=data)  # Sending as multipart/form-data
+        response = requests.post(
+            qwen2_vl_url, files=files, data=data
+        )  # Sending as multipart/form-data
 
         # Check if the request was successful
         if response.status_code == 200:
             result = response.json()
             return JSONResponse(content={"response": result["response"]})
         else:
-            raise HTTPException(status_code=response.status_code, detail="Error from qwen2-vl service")
+            raise HTTPException(
+                status_code=response.status_code, detail="Error from qwen2-vl service"
+            )
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
