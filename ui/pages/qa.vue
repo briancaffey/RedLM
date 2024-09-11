@@ -1,17 +1,24 @@
 <template>
-<template>
-  <div class="flex flex-col max-w-xl mx-auto p-4 space-y-4">
-    <div v-for="(message, index) in store.messages" :key="index" class="bg-gray-100 p-2 rounded shadow-sm">
-      <p class="text-sm">
-        <strong>{{ message.role }}:</strong> {{ message.content }}
-      </p>
+  <div class="flex flex-col w-xl max-w-xl mx-auto space-y-4">
+    <div class="text-center text-3xl">问答</div>
+    <div v-for="(message, index) in store.messages" :key="index" :class="[ message.role === 'assistant' ? ' self-start' : 'self-end', 'rounded']">
+        <div>
+          <p :class="[
+            message.role === 'assistant'
+            ? 'bg-red-700 text-white self-start text-left'
+            : 'bg-white self-end text-right',
+            'max-w-md p-4 rounded-lg'
+          ]">
+          {{ message.content }}
+        </p>
+      </div>
     </div>
 
     <div class="flex flex-col space-y-2">
       <textarea
         v-model="store.query"
         @keyup.enter="store.sendQuery"
-        placeholder="Type your query..."
+        placeholder="写下汝之疑问"
         class="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
       <button
@@ -19,12 +26,10 @@
         :disabled="store.isLoading"
         class="bg-red-700 text-white p-2 rounded disabled:bg-gray-300"
       >
-        Send
+      问话
       </button>
     </div>
   </div>
-</template>
-
 </template>
 
 <script setup lang="ts">

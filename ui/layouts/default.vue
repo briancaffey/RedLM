@@ -55,15 +55,27 @@
             <div class="hidden sm:block sm:ml-6">
               <div class="flex space-x-4">
                 <!-- Navigation links -->
-                <nuxt-link to="/" class="bg-red-900 text-white px-3 py-2 rounded-md text-sm font-medium">
+                <nuxt-link
+                  to="/"
+                  :class="isActive('/') ? 'bg-red-900 text-white' : 'text-red-300 hover:bg-red-700 hover:text-white'"
+                  class="px-3 py-2 rounded-md text-sm font-medium"
+                >
                   RedLM
                 </nuxt-link>
-                <nuxt-link to="/about" class="text-red-300 hover:bg-red-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
-                  About
-                </nuxt-link>
-                <nuxt-link to="/qa" class="text-red-300 hover:bg-red-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
-                  Q&A
-                </nuxt-link>
+                <nuxt-link
+                to="/qa"
+                :class="isActive('/qa') ? 'bg-red-900 text-white' : 'text-red-300 hover:bg-red-700 hover:text-white'"
+                class="px-3 py-2 rounded-md text-sm font-medium"
+                >
+                Q&A
+              </nuxt-link>
+              <nuxt-link
+                to="/about"
+                :class="isActive('/about') ? 'bg-red-900 text-white' : 'text-red-300 hover:bg-red-700 hover:text-white'"
+                class="px-3 py-2 rounded-md text-sm font-medium"
+              >
+                About
+              </nuxt-link>
               </div>
             </div>
           </div>
@@ -96,6 +108,13 @@
 </template>
 
 <script setup>
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+
+const isActive = (path) => {
+  return route.path === path
+}
 </script>
 
 <style scoped>

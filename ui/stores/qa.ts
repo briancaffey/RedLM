@@ -31,13 +31,12 @@ export const useQAStore = defineStore('qa', {
 
       // Add user message to the messages array
       this.messages.push({ role: 'user', content: this.query })
-
+      const q = this.query;
+      this.query = '';
       try {
         const response = await axios.post('http://localhost:8080/q-and-a', {
-          query: this.query
+          query: q
         })
-        console.log("testing..")
-        console.log(response);
 
         // Add assistant message to the messages array
         this.messages.push({ role: 'assistant', content: response.data.response })
