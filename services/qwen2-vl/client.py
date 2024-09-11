@@ -1,7 +1,7 @@
 import requests
 
 # API endpoint URL
-url = "http://localhost:8000/inference"
+url = "http://192.168.5.173:8000/inference"
 
 # Path to the local image file
 image_path = "test.png"
