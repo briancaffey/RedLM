@@ -9,19 +9,48 @@
         @mouseleave="endSelection"
       ></canvas>
     </div>
-    <p>Selected area data URL:</p>
-    <textarea v-model="selectedAreaDataUrl" readonly></textarea>
     <div v-if="selectedAreaDataUrl" class="preview">
       <p>Preview:</p>
       <img :src="selectedAreaDataUrl" alt="Selected area preview" />
+    </div>
+
+
+    <div class="flex flex-col w-xl max-w-xl mx-auto space-y-4">
+      <textarea
+        v-model="mmqaStore.query"
+        class="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+      <button
+        @click="mmqaStore.sendRequest"
+        class="bg-red-700 text-white p-2 rounded disabled:bg-gray-300">
+        Send Request
+      </button>
+      <div
+        v-for="(message, index) in mmqaStore.messages"
+        :key="index"
+        :class="[ message.role === 'assistant' ? ' self-start' : 'self-end', 'rounded'
+      ]">
+        <div>
+          <p :class="[
+            message.role === 'assistant'
+            ? 'bg-red-700 text-white self-start text-left'
+            : 'bg-white self-end text-right',
+            'max-w-md p-4 rounded-lg'
+          ]">
+            {{ message.content }}
+          </p>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useMmqaStore } from '@/stores/mmqa'
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 
+const mmqaStore = useMmqaStore()
 const canvas = ref<HTMLCanvasElement | null>(null);
 const canvasContainer = ref<HTMLDivElement | null>(null);
 const ctx = ref<CanvasRenderingContext2D | null>(null);
@@ -51,7 +80,7 @@ const loadImage = () => {
 const calculateScale = () => {
   if (canvasContainer.value && image.value) {
     const maxWidth = canvasContainer.value.clientWidth;
-    const maxHeight = window.innerHeight * 0.8; // Use 80% of viewport height
+    const maxHeight = window.innerHeight // * 0.8; // Use 80% of viewport height
     const widthScale = maxWidth / image.value.width;
     const heightScale = maxHeight / image.value.height;
     scale.value = Math.min(widthScale, heightScale, 1); // Don't scale up, only down
@@ -133,6 +162,7 @@ const updateSelectedAreaDataUrl = () => {
       height
     );
     selectedAreaDataUrl.value = tempCanvas.toDataURL();
+    mmqaStore.setBase64ImageData(selectedAreaDataUrl.value)
   }
 };
 
@@ -165,7 +195,7 @@ onMounted(() => {
 
 .canvas-container {
   width: 100%;
-  height: 80vh;
+  /* height: 80vh; */
   display: flex;
   justify-content: center;
   align-items: center;

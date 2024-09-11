@@ -17,7 +17,7 @@ interface Message {
 export const useMmqaStore = defineStore('mmqa', {
   state: () => ({
     base64ImageData: '',
-    query: '',
+    query: '请描述这张图片的内容。',
     messages: [] as Message[]
   }),
 
@@ -34,7 +34,7 @@ export const useMmqaStore = defineStore('mmqa', {
         })
 
         // Append assistant response to messages array
-        this.messages.push({ role: 'assistant', content: response.data })
+        this.messages.push({ role: 'assistant', content: response.data.response })
 
         return response.data
       } catch (error) {
