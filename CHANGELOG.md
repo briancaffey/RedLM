@@ -1,5 +1,30 @@
 # Changelog
 
+## [0.4.0](https://github.com/briancaffey/HLLM/compare/v0.3.0...v0.4.0) (2024-09-12)
+
+
+### Features
+
+* **metadata:** return node metadata from query engine and display in ui ([ff7eab3](https://github.com/briancaffey/HLLM/commit/ff7eab3d536350d26f06cb3f9faab4752fe044ff))
+* **multi-gpu:** changes to support distributed LLM generation ([296e774](https://github.com/briancaffey/HLLM/commit/296e774c6c3964261b711d993700e570a656f185))
+* **multi-modal-ui:** add formatting to image chat form and text boxes ([b22390b](https://github.com/briancaffey/HLLM/commit/b22390bbd9062d5f51a0f89228080736fdd04b5c))
+* **multi-modal:** add endpoint and test script for multi-modal Q and A ([87baeb7](https://github.com/briancaffey/HLLM/commit/87baeb7224e33608a07e4669e838f7d870655ed5))
+* **multi-modal:** add pinia store for multi-modal data and refactor image page to use script setup syntax ([96e4dea](https://github.com/briancaffey/HLLM/commit/96e4dea27af541bc9dafa9d584c2d1c474f50bc6))
+* **q-and-a-ui:** improve formatting for q and a component, fix navigation errors ([a0807d9](https://github.com/briancaffey/HLLM/commit/a0807d96f8249ef3bdf1c29f9024eed64157db8e))
+* **rag:** add additional endpoint for question and answer ([63aab04](https://github.com/briancaffey/HLLM/commit/63aab04c42b05288d63d36c503fb63259ae790e3))
+* **translation:** add mandarin and english translations to chapter detail page ([00b9b0a](https://github.com/briancaffey/HLLM/commit/00b9b0a7a3474d5bde73557ea2e5d89c40abaf2e))
+* **translation:** add translations made with qwen2-7b-chat ([5051deb](https://github.com/briancaffey/HLLM/commit/5051deb56a7aa65dfd32b64bc6faba8f8acbd468))
+* **translations:** add additional translations using qwen2-7b-chat ([d29b51a](https://github.com/briancaffey/HLLM/commit/d29b51a8f800cacf3f24d8e7d24b84f0779e5265))
+* **trt-llm-api:** use tensorrt-llm api to do translation, add sample translation for chapter 111 ([3cca5b6](https://github.com/briancaffey/HLLM/commit/3cca5b6077cdfc5a62bc96d0048d9b644db5fbb8))
+* **ui:** add modified drawer component for displaying chat message responses ([befa2b0](https://github.com/briancaffey/HLLM/commit/befa2b095f5c4e1b29512d4a94e28662f4db9989))
+* **ui:** fix fastapi and ui integration issues, add Q and A page ([51d4acb](https://github.com/briancaffey/HLLM/commit/51d4acbb4b3c023ea6927f5cbe2077505da29161))
+
+
+### Bug Fixes
+
+* **lint:** format with black ([991664b](https://github.com/briancaffey/HLLM/commit/991664b05cef300a1ecb6ecb482fc2a59d3de11e))
+* **ui:** scroll to bottom after question is answered ([833a45a](https://github.com/briancaffey/HLLM/commit/833a45af9a2895b6b01b10a1fb0aa5ffab5dbec0))
+
 ## [0.3.0](https://github.com/briancaffey/HLLM/compare/v0.2.0...v0.3.0) (2024-09-08)
 
 
