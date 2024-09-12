@@ -9,9 +9,16 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
 
+interface Metadata {
+  content: string
+  chapter: number
+  paragraph: number
+}
+
 interface Message {
   role: 'user' | 'assistant'
   content: string
+  metadata?: Metadata[]
 }
 
 export const useMmqaStore = defineStore('mmqa', {
@@ -22,7 +29,7 @@ export const useMmqaStore = defineStore('mmqa', {
   }),
 
   actions: {
-    async sendRequest() {
+    async sendRequest(chapterNumber: string) {
       try {
         // Append user message to messages array
         this.messages.push({ role: 'user', content: this.query })
@@ -30,11 +37,12 @@ export const useMmqaStore = defineStore('mmqa', {
         // Make API request
         const response = await axios.post('http://localhost:8080/mm-q-and-a', {
           prompt: this.query,
-          image: this.base64ImageData
+          image: this.base64ImageData,
+          chapter: chapterNumber
         })
 
         // Append assistant response to messages array
-        this.messages.push({ role: 'assistant', content: response.data.response })
+        this.messages.push({ role: 'assistant', content: response.data.response, metadata: response.data.metadata })
 
         return response.data
       } catch (error) {

@@ -6,12 +6,13 @@ import requests
 from fastapi import FastAPI, HTTPException, Form
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from llama_index.core.vector_stores import ExactMatchFilter, MetadataFilters
 from pydantic import BaseModel
 from PIL import Image
 
 from llama_index.core.llms import ChatMessage
 
-from .rag import get_qa_query_engine, get_q_and_a_query_engine
+from .rag import get_qa_query_engine, get_q_and_a_query_engine, get_query_engine_for_multi_modal
 
 
 app = FastAPI()
@@ -45,13 +46,14 @@ class QAQueryResponse(BaseModel):
 class MutliModalRequest(BaseModel):
     prompt: str
     image: str
+    chapter: int
 
 
 @app.on_event("startup")
 async def startup_event():
-    global query_engine, q_and_a_engine
+    global query_engine, q_and_a_engine, index
     query_engine = get_qa_query_engine()
-    q_and_a_engine = get_q_and_a_query_engine()
+    q_and_a_engine, index = get_q_and_a_query_engine()
 
 
 @app.post("/query", response_model=QueryResponse)
@@ -110,18 +112,28 @@ async def mm_q_and_a(req_data: MutliModalRequest):
 
         # Make the API call to qwen2-vl
         qwen2_vl_url = "http://192.168.5.173:8000/inference"
-        response = requests.post(
+        vision_model_response = requests.post(
             qwen2_vl_url, files=files, data=data
         )  # Sending as multipart/form-data
 
+        # filter by chapters associated with the queried image
+        filters = MetadataFilters(
+            filters=[ExactMatchFilter(key="chapter", value=str(req_data.chapter))]
+        )
+        query_engine = get_query_engine_for_multi_modal(index, filters)
+
         # Check if the request was successful
-        if response.status_code == 200:
-            result = response.json()
-            return JSONResponse(content={"response": result["response"]})
+        if vision_model_response.status_code == 200:
+            # the result from Qwen2-VL (image comprehension)
+            result = vision_model_response.json()
+            response = query_engine.query(result["response"])
         else:
             raise HTTPException(
                 status_code=response.status_code, detail="Error from qwen2-vl service"
             )
+
+        # return JSONResponse(content={"response": res, "metadata": []})
+        return QAQueryResponse(response=response[0].message.content, metadata=response[1])
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

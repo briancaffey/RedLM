@@ -35,6 +35,16 @@ q_and_a_prompt = PromptTemplate(
     "问题：{query_str}\n"
 )
 
+mm_q_and_a_prompt = PromptTemplate(
+    "下面是照片的描述：\n"
+    "---------------------\n"
+    "{query_str}\n"
+    "---------------------\n"
+    "这是书中和图片相关的内容：\n"
+    "{context_str}\n"
+    "根据上述的信息，尽量解释图片和书的关系。"
+)
+
 
 class QAQueryEngine(CustomQueryEngine):
     """RAG Completion Query Engine optimized for Q&A"""
@@ -64,7 +74,6 @@ class QAndAQueryEngine(CustomQueryEngine):
 
     def custom_query(self, query_str: str):
         nodes = self.retriever.retrieve(query_str)
-
         metadata = []
         # Collect the metadata into a list of dicts so that it can be sent to UI for references
         for node in nodes:
@@ -153,4 +162,29 @@ def get_q_and_a_query_engine():
         qa_prompt=q_and_a_prompt,
     )
 
+    return query_engine, index
+
+def get_query_engine_for_multi_modal(index, filters):
+    """
+    This function returns the query engine used for mutli-modal Q&A
+    The index is the index from the global scope in main.py
+    Filters are determined in the query parameters for the route that uses this engine
+    """
+    retriever = index.as_retriever(filters=filters)
+    synthesizer = get_response_synthesizer(response_mode="compact")
+    model = OpenAILike(
+        model="01-ai/Yi-1.5-9B-Chat",
+        api_base="http://localhost:8000/v1",
+        api_key="None",
+        max_tokens=1024,
+    )
+    try:
+        query_engine = QAndAQueryEngine(
+            retriever=retriever,
+            response_synthesizer=synthesizer,
+            llm=model,
+            qa_prompt=mm_q_and_a_prompt
+        )
+    except Exception as e:
+        print(e)
     return query_engine

@@ -5,7 +5,7 @@
     <div class="mx-auto max-w-5xl px-2 sm:px-4 md:px-4 lg:px-16 mt-4">
       <div class="flex flex-col items-center justify-center p-4">
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          <nuxt-link v-for="(image, index) in chapter.images" :to="`/paintings/${image.slice(0, -4)}`">
+          <nuxt-link v-for="(image, index) in chapter.images" :to="`/chapter/${chapterNum}/paintings/${image.slice(0, -4)}`">
             <NuxtImg
             :key="index"
             :src="`/img/paintings/${image}`"
@@ -41,6 +41,7 @@ const chapterStore = useChapterStore();
 
 const route = useRoute()
 const chapterData = ref(null)
+const chapterNum = route.params.num;
 const chapter = computed(() => chapterStore.getChapterByNumber(route.params.num));
 
 onMounted(async () => {

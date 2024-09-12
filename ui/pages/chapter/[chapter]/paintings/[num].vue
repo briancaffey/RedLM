@@ -21,7 +21,7 @@
         class="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
       <button
-        @click="mmqaStore.sendRequest"
+        @click="mmqaStore.sendRequest(chapterNum)"
         class="bg-red-700 text-white p-2 rounded disabled:bg-gray-300">
         Send Request
       </button>
@@ -40,12 +40,26 @@
             {{ message.content }}
           </p>
         </div>
+        <TooltipProvider>
+        <Tooltip v-for="(metadata, index) in message.metadata">
+          <TooltipTrigger asChild>
+            <NuxtLink :to="`/chapter/${metadata.chapter}#${metadata.paragraph}`">
+              <Badge class="bg-emerald-700 hover:bg-emerald-800 mr-2 mt-2">第{{ metadata.chapter }}回； 第{{ metadata.paragraph + 1 }}段落</Badge>
+            </NuxtLink>
+          </TooltipTrigger>
+          <TooltipContent class="max-w-60">
+            {{ metadata.content }}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { Badge } from '@/components/ui/badge'
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip'
 import { useMmqaStore } from '@/stores/mmqa'
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
@@ -63,6 +77,7 @@ const scale = ref(1);
 
 const route = useRoute();
 const imgNum = route.params.num as string;
+const chapterNum = route.params.chapter as string;
 
 const loadImage = () => {
   image.value = new Image();
