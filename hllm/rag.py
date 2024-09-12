@@ -64,6 +64,18 @@ class QAndAQueryEngine(CustomQueryEngine):
 
     def custom_query(self, query_str: str):
         nodes = self.retriever.retrieve(query_str)
+
+        metadata = []
+        # Collect the metadata into a list of dicts so that it can be sent to UI for references
+        for node in nodes:
+            metadata_dict = {}
+            node_metadata = node.node.metadata
+            metadata_dict["content"] = node.node.text
+            metadata_dict["chapter"] = int(node_metadata.get("chapter"))
+            metadata_dict["paragraph"] = int(node_metadata.get("paragraph"))
+
+            metadata.append(metadata_dict)
+
         context_str = "\n\n".join([n.node.get_content() for n in nodes])
         response = self.llm.chat(
             [
@@ -76,7 +88,7 @@ class QAndAQueryEngine(CustomQueryEngine):
             ]
         )
 
-        return response
+        return response, metadata
 
 
 def get_qa_query_engine():

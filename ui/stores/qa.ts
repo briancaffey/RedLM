@@ -1,9 +1,16 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
 
+interface Metadata {
+  content: string
+  chapter: number
+  paragraph: number
+}
+
 interface Message {
   role: 'user' | 'assistant'
   content: string
+  metadata?: Metadata[]
 }
 
 interface State {
@@ -39,7 +46,7 @@ export const useQAStore = defineStore('qa', {
         })
 
         // Add assistant message to the messages array
-        this.messages.push({ role: 'assistant', content: response.data.response })
+        this.messages.push({ role: 'assistant', content: response.data.response, metadata: response.data.metadata })
       } catch (error) {
         console.error('Error sending query:', error)
         // Optionally, you can add an error message to the messages array

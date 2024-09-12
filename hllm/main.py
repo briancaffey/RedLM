@@ -1,4 +1,5 @@
 import base64
+from typing import List, Optional
 from io import BytesIO
 import requests
 
@@ -30,9 +31,15 @@ class QueryRequest(BaseModel):
 class QueryResponse(BaseModel):
     response: str
 
+class DocumentMetadata(BaseModel):
+    chapter: int
+    paragraph: int
+    content: str
+
 
 class QAQueryResponse(BaseModel):
     response: str
+    metadata: Optional[List[DocumentMetadata]] = None
 
 
 class MutliModalRequest(BaseModel):
@@ -57,13 +64,13 @@ async def perform_query(request: QueryRequest):
     return QueryResponse(response=str(response))
 
 
-@app.post("/q-and-a", response_model=QueryResponse)
+@app.post("/q-and-a", response_model=QAQueryResponse)
 async def perform_q_and_a(request: QueryRequest):
     """
     This endpoint is used by the Q&A bot
     """
     response = q_and_a_engine.query(request.query)
-    return QAQueryResponse(response=response.message.content)
+    return QAQueryResponse(response=response[0].message.content, metadata=response[1])
 
 
 def fix_base64_padding(data: str) -> str:
