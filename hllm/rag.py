@@ -164,6 +164,7 @@ def get_q_and_a_query_engine():
 
     return query_engine, index
 
+
 def get_query_engine_for_multi_modal(index, filters):
     """
     This function returns the query engine used for mutli-modal Q&A
@@ -183,7 +184,7 @@ def get_query_engine_for_multi_modal(index, filters):
             retriever=retriever,
             response_synthesizer=synthesizer,
             llm=model,
-            qa_prompt=mm_q_and_a_prompt
+            qa_prompt=mm_q_and_a_prompt,
         )
     except Exception as e:
         print(e)

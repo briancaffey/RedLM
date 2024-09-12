@@ -12,7 +12,11 @@ from PIL import Image
 
 from llama_index.core.llms import ChatMessage
 
-from .rag import get_qa_query_engine, get_q_and_a_query_engine, get_query_engine_for_multi_modal
+from .rag import (
+    get_qa_query_engine,
+    get_q_and_a_query_engine,
+    get_query_engine_for_multi_modal,
+)
 
 
 app = FastAPI()
@@ -31,6 +35,7 @@ class QueryRequest(BaseModel):
 
 class QueryResponse(BaseModel):
     response: str
+
 
 class DocumentMetadata(BaseModel):
     chapter: int
@@ -132,9 +137,9 @@ async def mm_q_and_a(req_data: MutliModalRequest):
                 status_code=response.status_code, detail="Error from qwen2-vl service"
             )
 
-        # return JSONResponse(content={"response": res, "metadata": []})
-        return QAQueryResponse(response=response[0].message.content, metadata=response[1])
-
+        return QAQueryResponse(
+            response=response[0].message.content, metadata=response[1]
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
