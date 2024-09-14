@@ -128,7 +128,7 @@ def main():
     # models to use
     # Qwen/Qwen2-7B
     # baichuan-inc/Baichuan2-13B-Base
-    MODEL = "Qwen/Qwen2-7B"
+    MODEL = "baichuan-inc/Baichuan2-13B-Base"
 
     # Version is "original" | "english" | "mandarin"
     VERSION = "original"
@@ -150,11 +150,13 @@ def main():
     for i in range(1, 121):
 
         file_path = os.path.join(directory_path, f"{i}.json")
-        print(f"Translating: {file_path}")
 
         # get paragraphs to translate
         chapter_data = get_chapter_data(file_path)
         chapter_paragraphs = chapter_data.get("paragraphs", [])
+        chapter_title = chapter_data.get("title")
+        print(f"第{i}回 （{i}.json）")
+        print(chapter_title)
         paragraphs = [p["original"] for p in chapter_paragraphs]
 
         # split paragraphs
@@ -164,22 +166,22 @@ def main():
         # bai_prompts = [f"{bh_to_zh}{p}\n\n" for p in flat_bai]
         bai_prompts = [f"以下是如何将中国白话改写为简单的现代普通话的示例。\n\n中国白话：\n\n{p}\n\n简单的现代普通话：\n\n" for p in flat_bai]
         # TODO: fix failures where context is exceeded
-        
-        max_input_len = max([len(p) for p in bai_prompts])
-        print(f"Max length of bai input prompts {max_input_len}")
 
+        # max_input_len = max([len(p) for p in bai_prompts])
+        # print(f"Max length of bai input prompts {max_input_len}")
+        print("白话写成现代汉语")
         try:
             chinese_outputs = llm.generate(bai_prompts, sampling_params)
         except Exception as e:
-            print("############## Exception ###############")
+            print("############## Exception in Baihua to Mandarin ###############")
             print(e)
             continue
         chinese_paragraphs = [
             output.outputs[0].text for output in chinese_outputs
         ]
-        
+
         max_len = max([len(p) for p in chinese_paragraphs])
-        print(f"Maximum length of translated text: {max_len}")
+        # print(f"Maximum length of translated text: {max_len}")
 
         # combine flat paragraphs and paragraph fragments to list of paragraphs
         complete_chinese_paragraphs = combine(chinese_paragraphs, structured_bai)
@@ -189,7 +191,11 @@ def main():
 
         # chinese to english
         # prompts = [f"{zh_to_en}{p}\n\n" for p in flat_mandarin]
-        prompts = [f"中文原文：\n\n{p}\n\n英文翻译：\n\n" for p in flat_mandarin]
+
+        # prompts = [f"中文原文：\n\n{p}\n\n英文翻译：\n\n" for p in flat_mandarin]
+        prompts = [f"中文原文：\n\n{p}\n\nEnglish Translation:\n\n" for p in flat_mandarin]
+
+        print("中文翻译成英文")
         try:
             english_outputs = llm.generate(prompts, sampling_params)
         except Exception as e:
@@ -205,6 +211,7 @@ def main():
         complete_english_paragraphs = combine(english_paragraphs, structured_mandarin)
 
         # add chinese and english translations to chapter_data
+
         all_paragraphs = [
             {**og_dict, "english": en_val, "chinese": cn_val}
             for og_dict, en_val, cn_val in zip(
@@ -216,6 +223,7 @@ def main():
 
         with open(file_path, "w", encoding="utf-8") as file:
             json.dump(chapter_data, file, ensure_ascii=False, indent=4)
+
 
         print(f"Translated: {file_path}")
 
