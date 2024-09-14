@@ -147,7 +147,7 @@ def main():
     llm = LLM(model=MODEL, build_config=build_config, tensor_parallel_size=4)
 
     directory_path = "data/book"
-    for i in range(1, 122):
+    for i in range(1, 3):
 
         file_path = os.path.join(directory_path, f"{i}.json")
         print(f"Translating: {file_path}")
@@ -158,34 +158,49 @@ def main():
         paragraphs = [p["original"] for p in chapter_paragraphs]
 
         # split paragraphs
-        flat_bai, structured_bai = process_strings(paragraphs)
+        flat_bai, structured_bai = process_strings(paragraphs, 300)
 
         # bai hua to chinese
-        bai_prompts = [f"{bh_to_zh}{p}\n\n" for p in flat_bai]
+        # bai_prompts = [f"{bh_to_zh}{p}\n\n" for p in flat_bai]
+        bai_prompts = [f"以下是如何将中国白话改写为简单的现代普通话的示例。\n\n中国白话：\n\n{p}\n\n简单的现代普通话：\n\n" for p in flat_bai]
         # TODO: fix failures where context is exceeded
+        
+        max_input_len = max([len(p) for p in bai_prompts])
+        print(f"Max length of bai input prompts {max_input_len}")
+
         try:
             chinese_outputs = llm.generate(bai_prompts, sampling_params)
-        except:
+        except Exception as e:
+            print("############## Exception ###############")
+            print(e)
             continue
         chinese_paragraphs = [
             output.outputs[0].text for output in chinese_outputs
         ]
+        
+        max_len = max([len(p) for p in chinese_paragraphs])
+        print(f"Maximum length of translated text: {max_len}")
 
         # combine flat paragraphs and paragraph fragments to list of paragraphs
         complete_chinese_paragraphs = combine(chinese_paragraphs, structured_bai)
 
         # prepare Mandarin Chinese paragraphs for translation to English
-        flat_mandarin, structured_mandarin = process_strings(complete_chinese_paragraphs)
+        flat_mandarin, structured_mandarin = process_strings(complete_chinese_paragraphs, 300)
 
         # chinese to english
-        prompts = [f"{zh_to_en}{p}\n\n" for p in flat_mandarin]
+        # prompts = [f"{zh_to_en}{p}\n\n" for p in flat_mandarin]
+        prompts = [f"中文原文：\n\n{p}\n\n英文翻译：\n\n" for p in flat_mandarin]
         try:
             english_outputs = llm.generate(prompts, sampling_params)
-        except:
+        except Exception as e:
+            print("############## Exception in English translation ###############")
+            print(e)
             continue
         english_paragraphs = [
             output.outputs[0].text for output in english_outputs
         ]
+
+
 
         complete_english_paragraphs = combine(english_paragraphs, structured_mandarin)
 
