@@ -4,11 +4,14 @@ This script asks multiple choice questions to the LLM and parses the answer
 
 import os
 import json
-import openai
+from llama_index.llms.openai_like import OpenAILike
 
-client = openai.OpenAI(
-    api_key=os.environ.get("OPENAI_API_KEY", "None"),
-    base_url="http://localhost:8000/v1",
+model = OpenAILike(
+    model="01-ai/Yi-1.5-9B-Chat",
+    api_base="http://localhost:8000/v1",
+    api_key="None",
+    # keep this number small since we don't need a long explination for multiple-choice test evaluation
+    max_tokens=16,
 )
 
 
@@ -33,32 +36,22 @@ def take_test(data):
     correct = 0
 
     for i, q in enumerate(data):
-        # create a prompt to get the answer choice as a letter
-        response = client.chat.completions.create(
-            messages=[
-                {
-                    "role": "system",
-                    "content": "请回答问题。不要解释你的答案，只需说明哪个选项是正确答案。",
-                },
-                {
-                    "role": "user",
-                    "content": format_question(q),
-                },
-            ],
-            model="01-ai/Yi-1.5-9B-Chat",
-        )
 
-        llm_answer = response.choices[0].message.content.strip()
-        print(llm_answer)
+        query = format_question(q)
+        response = model.complete(prompt=query)
 
-        if q["answer"].lower() in llm_answer.lower():
+        print(query)
+        print(response.text)
+
+        if q["answer"].lower() in response.text.lower():
             correct += 1
             print("✅")
         else:
             print("❌")
 
         percent = correct / (i + 1)
-        print(f"{correct}/{i+1} - Score: {percent:.2f}%")
+        print(f"{correct}/{i+1} - Score: {percent*100:.2f}%")
+        print()
 
     print(f"Answered {correct} questions correctly out of {num_questions}")
 
