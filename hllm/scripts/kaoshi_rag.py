@@ -46,8 +46,8 @@ def take_test(data):
             # Parse the JSON response
             result = response.json()
 
-            print("Query:", query)
-            print("Response:", result["response"])
+            print(query)
+            print(result["response"])
         else:
             print("Error:", response.status_code, response.text)
 
@@ -58,7 +58,8 @@ def take_test(data):
             print("❌")
 
         percent = correct / (i + 1)
-        print(f"{correct}/{i+1} - Score: {percent:.2f}%")
+        print(f"{correct}/{i+1} - Score: {percent*100:.2f}%")
+        print()
 
 
 take_test(data)
