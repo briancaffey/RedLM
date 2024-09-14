@@ -141,13 +141,13 @@ def main():
             data = json.load(file)
         return data
 
-    sampling_params = SamplingParams(temperature=0.8, top_p=0.95, max_tokens=2048)
-    build_config = BuildConfig(max_seq_len=4096)
+    sampling_params = SamplingParams(temperature=.7, top_p=0.95, max_tokens=256)
+    build_config = BuildConfig(max_seq_len=2048)
 
     llm = LLM(model=MODEL, build_config=build_config, tensor_parallel_size=4)
 
     directory_path = "data/book"
-    for i in range(1, 3):
+    for i in range(1, 121):
 
         file_path = os.path.join(directory_path, f"{i}.json")
         print(f"Translating: {file_path}")
