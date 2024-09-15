@@ -9,22 +9,11 @@
         @mouseleave="endSelection"
       ></canvas>
     </div>
-    <div v-if="selectedAreaDataUrl" class="preview">
-      <p>Preview:</p>
+    <div v-if="selectedAreaDataUrl" class="preview pt-8">
       <img :src="selectedAreaDataUrl" alt="Selected area preview" />
     </div>
-
-
-    <div class="flex flex-col w-xl max-w-xl mx-auto space-y-4">
-      <textarea
-        v-model="mmqaStore.query"
-        class="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-      />
-      <button
-        @click="mmqaStore.sendRequest(chapterNum)"
-        class="bg-red-700 text-white p-2 rounded disabled:bg-gray-300">
-        Send Request
-      </button>
+  </div>
+    <div class="flex flex-col max-w-xl mx-auto space-y-2">
       <div
         v-for="(message, index) in mmqaStore.messages"
         :key="index"
@@ -53,8 +42,20 @@
         </Tooltip>
       </TooltipProvider>
       </div>
+      <LoadingSpinner class="justify-center" v-if="mmqaStore.isLoading" />
+      <div class="flex flex-col space-y-2">
+        <textarea
+          v-model="mmqaStore.query"
+          class="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <button
+          @click="askQuestion(chapterNum)"
+          class="bg-red-700 text-white p-2 rounded disabled:bg-gray-300">
+          解图
+        </button>
+      </div>
     </div>
-  </div>
+
 </template>
 
 <script setup lang="ts">
@@ -195,6 +196,11 @@ onMounted(() => {
     }
   });
 });
+
+const askQuestion = async (chapterNumber: string) => {
+  await mmqaStore.sendRequest(chapterNumber);
+  window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+}
 </script>
 
 <style scoped>

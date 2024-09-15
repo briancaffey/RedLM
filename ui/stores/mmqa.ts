@@ -25,7 +25,8 @@ export const useMmqaStore = defineStore('mmqa', {
   state: () => ({
     base64ImageData: '',
     query: '请描述这张图片的内容。',
-    messages: [] as Message[]
+    messages: [] as Message[],
+    isLoading: false
   }),
 
   actions: {
@@ -33,13 +34,15 @@ export const useMmqaStore = defineStore('mmqa', {
       try {
         // Append user message to messages array
         this.messages.push({ role: 'user', content: this.query })
-
+        this.isLoading = true
         // Make API request
         const response = await axios.post('http://localhost:8080/mm-q-and-a', {
           prompt: this.query,
           image: this.base64ImageData,
           chapter: chapterNumber
         })
+
+        // this.isLoading = false
 
         // Append assistant response to messages array
         this.messages.push({ role: 'assistant', content: response.data.response, metadata: response.data.metadata })
@@ -48,6 +51,9 @@ export const useMmqaStore = defineStore('mmqa', {
       } catch (error) {
         console.error('Error sending request:', error)
         throw error
+      } finally {
+        // Reset isLoading regardless of success or failure
+        this.isLoading = false
       }
     },
 
