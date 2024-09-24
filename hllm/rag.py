@@ -1,11 +1,13 @@
 import json
+import os
+
+from dotenv import load_dotenv
+load_dotenv()
 
 from llama_index.core import (
     get_response_synthesizer,
-    load_index_from_storage,
     PromptTemplate,
     Settings,
-    StorageContext,
 )
 from llama_index.core.llms import ChatMessage
 from llama_index.core.query_engine import CustomQueryEngine
@@ -13,7 +15,21 @@ from llama_index.core.retrievers import BaseRetriever
 from llama_index.core.response_synthesizers import BaseSynthesizer
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 
+from llama_index.llms.nvidia import NVIDIA
 from llama_index.llms.openai_like import OpenAILike
+from .utils import get_llm, get_index
+
+# LLMs
+
+# Completion Model - used primarily for evaluation, defaults to 01-ai/Yi-1.5-9B
+COMPLETION_MODEL = os.environ.get("COMPLETION_MODEL", "01-ai/Yi-1.5-9B")
+completion_model = get_llm(model_name=COMPLETION_MODEL)
+
+# Chat Model - used for Q&A bot and Multi-Modal Q&A Bot
+# defaults to baichuan-inc/baichuan2-13b-chat or 01-ai/Yi-1.5-9B-Instruct
+# depending on NVIDIA_API_KEY
+model = get_llm()
+index = get_index()
 
 
 qa_prompt = PromptTemplate(
@@ -102,22 +118,13 @@ class QAndAQueryEngine(CustomQueryEngine):
 
 
 def get_qa_query_engine():
-
-    # Initialize the model
-    model = OpenAILike(
-        model="01-ai/Yi-1.5-9B-Chat",
-        api_base="http://localhost:8000/v1",
-        api_key="None",
-        # keep this number small since we don't need a long explination for multiple-choice test evaluation
-        max_tokens=16,
-    )
+    """
+    Query engine used for evaluation with RAG (uses completion)
+    """
 
     # Configure Settings
     Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-zh-v1.5")
     Settings.llm = model
-
-    storage_context = StorageContext.from_defaults(persist_dir="storage")
-    index = load_index_from_storage(storage_context)
 
     retriever = index.as_retriever()
 
@@ -126,7 +133,7 @@ def get_qa_query_engine():
     query_engine = QAQueryEngine(
         retriever=retriever,
         response_synthesizer=synthesizer,
-        llm=model,
+        llm=completion_model,
         qa_prompt=qa_prompt,
     )
 
@@ -137,20 +144,10 @@ def get_q_and_a_query_engine():
     """
     Query engine to be used for asking questions (uses chat format)
     """
-    # Initialize the model
-    model = OpenAILike(
-        model="01-ai/Yi-1.5-9B-Chat",
-        api_base="http://localhost:8000/v1",
-        api_key="None",
-        max_tokens=1024,
-    )
 
     # Configure Settings
     Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-zh-v1.5")
     Settings.llm = model
-
-    storage_context = StorageContext.from_defaults(persist_dir="storage")
-    index = load_index_from_storage(storage_context)
 
     retriever = index.as_retriever()
 
@@ -174,17 +171,11 @@ def get_query_engine_for_multi_modal(index, filters):
     """
     retriever = index.as_retriever(filters=filters)
     synthesizer = get_response_synthesizer(response_mode="compact")
-    model = OpenAILike(
-        model="01-ai/Yi-1.5-9B-Chat",
-        api_base="http://localhost:8000/v1",
-        api_key="None",
-        max_tokens=1024,
-    )
     try:
         query_engine = QAndAQueryEngine(
             retriever=retriever,
             response_synthesizer=synthesizer,
-            llm=model,
+            llm=model, # TOOD: set max_tokens=1024 when using completion
             qa_prompt=mm_q_and_a_prompt,
         )
     except Exception as e:

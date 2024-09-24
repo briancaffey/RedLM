@@ -1,5 +1,7 @@
 llama-index
 llama-index-embeddings-huggingface
+llama-index-llms-nvidia
 llama-index-llms-openai-like
 fastapi[standard]
 black
+python-dotenv
