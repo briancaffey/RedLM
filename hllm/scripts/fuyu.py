@@ -9,6 +9,7 @@ import os
 import requests
 
 from dotenv import load_dotenv
+
 load_dotenv()
 
 
@@ -20,28 +21,29 @@ with open("scripts/test.png", "rb") as f:
 
 print("Image size.....")
 print(len(image_b64))
-assert len(image_b64) < 180_000, \
-  "To upload larger images, use the assets API (see docs)"
+assert (
+    len(image_b64) < 180_000
+), "To upload larger images, use the assets API (see docs)"
 
 API_KEY = os.environ.get("NVIDIA_API_KEY")
 
 headers = {
-  "Authorization": f"Bearer {API_KEY}",
-  "Accept": "text/event-stream" if stream else "application/json"
+    "Authorization": f"Bearer {API_KEY}",
+    "Accept": "text/event-stream" if stream else "application/json",
 }
 
 payload = {
-  "messages": [
-    {
-      "role": "user",
-      "content": f'What do you see in the following image? <img src="data:image/png;base64,{image_b64}" />'
-    }
-  ],
-  "max_tokens": 1024,
-  "temperature": 0.20,
-  "top_p": 0.70,
-  "seed": 0,
-  "stream": stream
+    "messages": [
+        {
+            "role": "user",
+            "content": f'What do you see in the following image? <img src="data:image/png;base64,{image_b64}" />',
+        }
+    ],
+    "max_tokens": 1024,
+    "temperature": 0.20,
+    "top_p": 0.70,
+    "seed": 0,
+    "stream": stream,
 }
 
 response = requests.post(invoke_url, headers=headers, json=payload)

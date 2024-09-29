@@ -2,6 +2,7 @@ import json
 import os
 
 from dotenv import load_dotenv
+
 load_dotenv()
 
 from llama_index.core import (
@@ -163,7 +164,7 @@ def get_q_and_a_query_engine():
     return query_engine, index
 
 
-def get_query_engine_for_multi_modal(index, filters):
+def get_query_engine_for_multi_modal(filters):
     """
     This function returns the query engine used for mutli-modal Q&A
     The index is the index from the global scope in main.py
@@ -175,7 +176,7 @@ def get_query_engine_for_multi_modal(index, filters):
         query_engine = QAndAQueryEngine(
             retriever=retriever,
             response_synthesizer=synthesizer,
-            llm=model, # TOOD: set max_tokens=1024 when using completion
+            llm=model,  # TOOD: set max_tokens=1024 when using completion
             qa_prompt=mm_q_and_a_prompt,
         )
     except Exception as e:

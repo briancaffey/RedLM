@@ -18,6 +18,8 @@ from .rag import (
     get_query_engine_for_multi_modal,
 )
 
+from .utils import process_mm_qa_request
+
 
 app = FastAPI()
 app.add_middleware(
@@ -86,6 +88,42 @@ def fix_base64_padding(data: str) -> str:
 
 
 @app.post("/mm-q-and-a")
+async def mm_q_and_a_v2(req_data: MutliModalRequest):
+    """
+    This function does the following
+    - passes image and prompt data to the process_mm_qa_request function for image description
+    - uses this data to make a query using the multi-modal QA Query engine
+    - returns the results of the multi-modal QA query engine
+    - Depending on configuration, either fuyu or Qwen2-VL is used to process image data
+    """
+    try:
+        # response is the text description of the image in Chinese
+        # uses Qwen2-VL locally OR meta/llama-3.2-90b-vision-instruct from NVIDIA API catalog
+        image_description = process_mm_qa_request(req_data)
+        print(f"Image description: {image_description}")
+
+        # use query engine to make query about image
+        # TODO: implement this
+        filters = MetadataFilters(
+            filters=[ExactMatchFilter(key="chapter", value=str(req_data.chapter))]
+        )
+
+        # get the query engine with the filters
+        # here we filter for the different
+        query_engine = get_query_engine_for_multi_modal(filters)
+
+        response = query_engine.query(image_description)
+        print(response)
+
+        return QAQueryResponse(
+            response=response[0].message.content, metadata=response[1]
+        )
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/mm-q-and-a-old")
 async def mm_q_and_a(req_data: MutliModalRequest):
     """
     This function is used for asking questions about images in the UI (multi-modal RAG)
@@ -125,7 +163,7 @@ async def mm_q_and_a(req_data: MutliModalRequest):
         filters = MetadataFilters(
             filters=[ExactMatchFilter(key="chapter", value=str(req_data.chapter))]
         )
-        query_engine = get_query_engine_for_multi_modal(index, filters)
+        query_engine = get_query_engine_for_multi_modal(filters)
 
         # Check if the request was successful
         if vision_model_response.status_code == 200:

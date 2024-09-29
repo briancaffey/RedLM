@@ -22,7 +22,7 @@ def main():
         # Helper function to append segment to result
         def append_segment():
             if current_segment:
-                result.append(''.join(current_segment))
+                result.append("".join(current_segment))
 
         for idx, char in enumerate(text):
             current_segment.append(char)
@@ -72,7 +72,7 @@ def main():
 
             else:
                 count = len(structured[s])
-                to_append = flat[t:t+count]
+                to_append = flat[t : t + count]
                 output.append(to_append)
                 t += count
                 s += 1
@@ -141,7 +141,7 @@ def main():
             data = json.load(file)
         return data
 
-    sampling_params = SamplingParams(temperature=.7, top_p=0.95, max_tokens=256)
+    sampling_params = SamplingParams(temperature=0.7, top_p=0.95, max_tokens=256)
     build_config = BuildConfig(max_seq_len=2048)
 
     llm = LLM(model=MODEL, build_config=build_config, tensor_parallel_size=4)
@@ -164,7 +164,10 @@ def main():
 
         # bai hua to chinese
         # bai_prompts = [f"{bh_to_zh}{p}\n\n" for p in flat_bai]
-        bai_prompts = [f"以下是如何将中国白话改写为简单的现代普通话的示例。\n\n中国白话：\n\n{p}\n\n简单的现代普通话：\n\n" for p in flat_bai]
+        bai_prompts = [
+            f"以下是如何将中国白话改写为简单的现代普通话的示例。\n\n中国白话：\n\n{p}\n\n简单的现代普通话：\n\n"
+            for p in flat_bai
+        ]
         # TODO: fix failures where context is exceeded
 
         # max_input_len = max([len(p) for p in bai_prompts])
@@ -176,9 +179,7 @@ def main():
             print("############## Exception in Baihua to Mandarin ###############")
             print(e)
             continue
-        chinese_paragraphs = [
-            output.outputs[0].text for output in chinese_outputs
-        ]
+        chinese_paragraphs = [output.outputs[0].text for output in chinese_outputs]
 
         max_len = max([len(p) for p in chinese_paragraphs])
         # print(f"Maximum length of translated text: {max_len}")
@@ -187,13 +188,17 @@ def main():
         complete_chinese_paragraphs = combine(chinese_paragraphs, structured_bai)
 
         # prepare Mandarin Chinese paragraphs for translation to English
-        flat_mandarin, structured_mandarin = process_strings(complete_chinese_paragraphs, 300)
+        flat_mandarin, structured_mandarin = process_strings(
+            complete_chinese_paragraphs, 300
+        )
 
         # chinese to english
         # prompts = [f"{zh_to_en}{p}\n\n" for p in flat_mandarin]
 
         # prompts = [f"中文原文：\n\n{p}\n\n英文翻译：\n\n" for p in flat_mandarin]
-        prompts = [f"中文原文：\n\n{p}\n\nEnglish Translation:\n\n" for p in flat_mandarin]
+        prompts = [
+            f"中文原文：\n\n{p}\n\nEnglish Translation:\n\n" for p in flat_mandarin
+        ]
 
         print("中文翻译成英文")
         try:
@@ -202,11 +207,7 @@ def main():
             print("############## Exception in English translation ###############")
             print(e)
             continue
-        english_paragraphs = [
-            output.outputs[0].text for output in english_outputs
-        ]
-
-
+        english_paragraphs = [output.outputs[0].text for output in english_outputs]
 
         complete_english_paragraphs = combine(english_paragraphs, structured_mandarin)
 
@@ -215,7 +216,9 @@ def main():
         all_paragraphs = [
             {**og_dict, "english": en_val, "chinese": cn_val}
             for og_dict, en_val, cn_val in zip(
-                chapter_paragraphs, complete_english_paragraphs, complete_chinese_paragraphs
+                chapter_paragraphs,
+                complete_english_paragraphs,
+                complete_chinese_paragraphs,
             )
         ]
 
@@ -223,7 +226,6 @@ def main():
 
         with open(file_path, "w", encoding="utf-8") as file:
             json.dump(chapter_data, file, ensure_ascii=False, indent=4)
-
 
         print(f"Translated: {file_path}")
 
