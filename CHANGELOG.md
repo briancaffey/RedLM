@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.5.0](https://github.com/briancaffey/HLLM/compare/v0.4.0...v0.5.0) (2024-09-30)
+
+
+### Features
+
+* **evaluation:** update logging in scripts for evaluation ([e6e9606](https://github.com/briancaffey/HLLM/commit/e6e96066217441421b8c9dabfb9c23c8dafaca6f))
+* **multi-modal-rag:** finish implementation of multi-modal rag ([c38a356](https://github.com/briancaffey/HLLM/commit/c38a356902fc82a3942ab1b8e05a530834a5e969))
+* **nims:** use NIMs for LLM inference ([53b49ab](https://github.com/briancaffey/HLLM/commit/53b49abc990e5488a7fe78f14d59a51b1d409ca4))
+* **nvidia:** finish implementation of nvidia cloud apis for image q&a with vision language models ([f8ff0b3](https://github.com/briancaffey/HLLM/commit/f8ff0b3a4c45b23045f6ff6acfc318e244715e13))
+* **translation:** improve logging for translation script ([7aa55b4](https://github.com/briancaffey/HLLM/commit/7aa55b48ea28fb44fea03c55137c4f17b016d496))
+* **translation:** translated all 120 chapters successfully, fixed context window errors, tuned LLM parameters ([fb05ed5](https://github.com/briancaffey/HLLM/commit/fb05ed5c4bcf0946d5df34c3edf9ccb050eaa048))
+* **translation:** update script for translation ([aad58dd](https://github.com/briancaffey/HLLM/commit/aad58dd1533dd2d523218528211ed03d280d8bff))
+* **translation:** update translation script and translation prompts, add new translation using Qwen2-7B base model ([6978bd4](https://github.com/briancaffey/HLLM/commit/6978bd46d7338003bfcf62666bf7f911b61f7784))
+* **ui:** better styles for reference badges and image selection ([8934f5e](https://github.com/briancaffey/HLLM/commit/8934f5e098992361d50c2514e18ffcdbca1c9ed9))
+
+
+### Bug Fixes
+
+* **lint:** format code with black ([12b1835](https://github.com/briancaffey/HLLM/commit/12b183568bd8939144919ea884cd0dcb5be3bb28))
+* **ui:** formatting for mmqa ui ([49d012a](https://github.com/briancaffey/HLLM/commit/49d012a9e0d6bca84e3b9d11469f86f28c19d203))
+
 ## [0.4.0](https://github.com/briancaffey/HLLM/compare/v0.3.0...v0.4.0) (2024-09-12)
 
 
