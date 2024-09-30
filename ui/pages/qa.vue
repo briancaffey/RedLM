@@ -20,7 +20,7 @@
         <Tooltip v-for="(metadata, index) in message.metadata">
           <TooltipTrigger asChild>
             <NuxtLink :to="`/chapter/${metadata.chapter}#${metadata.paragraph}`">
-              <Badge class="bg-emerald-700 hover:bg-emerald-800 mr-2 mt-2">第{{ metadata.chapter }}回； 第{{ metadata.paragraph + 1 }}段落</Badge>
+              <Badge class="bg-emerald-700 hover:bg-emerald-800 mr-2 mt-2 px-4 py-2 text-base">第 {{ metadata.chapter }} 回； 第 {{ metadata.paragraph + 1 }} 段落</Badge>
             </NuxtLink>
           </TooltipTrigger>
           <TooltipContent class="max-w-60">

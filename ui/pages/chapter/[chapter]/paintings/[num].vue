@@ -33,7 +33,7 @@
         <Tooltip v-for="(metadata, index) in message.metadata">
           <TooltipTrigger asChild>
             <NuxtLink :to="`/chapter/${metadata.chapter}#${metadata.paragraph}`">
-              <Badge class="bg-emerald-700 hover:bg-emerald-800 mr-2 mt-2">第{{ metadata.chapter }}回； 第{{ metadata.paragraph + 1 }}段落</Badge>
+              <Badge class="bg-emerald-700 hover:bg-emerald-800 mr-2 mt-2 px-4 py-2 text-base">第 {{ metadata.chapter }} 回； 第 {{ metadata.paragraph + 1 }} 段落</Badge>
             </NuxtLink>
           </TooltipTrigger>
           <TooltipContent class="max-w-60">
@@ -52,6 +52,11 @@
           @click="askQuestion(chapterNum)"
           class="bg-red-700 text-white p-2 rounded disabled:bg-gray-300">
           解图
+        </button>
+        <button
+          @click="mmqaStore.messages = []"
+          class="bg-black text-white p-2 rounded disabled:bg-gray-300">
+          清除
         </button>
       </div>
     </div>
@@ -144,7 +149,10 @@ const drawImageWithSelection = () => {
 
     ctx.value.strokeStyle = 'red';
     ctx.value.lineWidth = 2 / scale.value;
-    ctx.value.setLineDash([5 / scale.value, 5 / scale.value]);
+    // ctx.value.setLineDash([5 / scale.value, 5 / scale.value]);
+    ctx.value.strokeStyle = 'red';  // Keep the same color
+    ctx.value.lineWidth = 4 / scale.value;  // Increase the thickness (adjust the value as needed)
+
     ctx.value.strokeRect(
       selectionStart.value.x * scale.value,
       selectionStart.value.y * scale.value,
