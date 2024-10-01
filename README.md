@@ -18,7 +18,7 @@ The application is built with the following technologies:
 
 - Backend API built with Python, FastAPI and LlamaIndex
 - Frontend web UI built with Vue 3 and Nuxt 3
-- Inferences services (either using local services or NVIDIA Cloud APIs)
+- Inference services (either using local services or NVIDIA Cloud APIs)
 
 The application can run on Mac, Windows and Linux. Using local inference services requires Linux.
 
