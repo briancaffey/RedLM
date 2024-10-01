@@ -6,8 +6,17 @@ Image content is described by Qwen2-VL, and results are used to make RAG queries
 
 For example, if the image contains people playing a board game, then the query may include a specific paragraph about people playing a board game.
 
+## Install dependencies
+
+```
+cd services/qwen2-vl
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
 ## Start the service
 
 ```
-fastapi dev main.py
+fastapi dev main.py --host 0.0.0.0 --port 8000
 ```

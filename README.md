@@ -83,6 +83,39 @@ The frontend application has two main features: text-based Q&A and image-based Q
 
 Text-based Q&A will answer questions about the book using retrieval augmented generation (RAG) with LlamaIndex.
 
+## Running Inferences services locally
+
+Running inference services locally requires an NVIDIA GeForce RTX GPU. The following instructions assume the use of Ubuntu for the operating system. Everything here was tested on Ubuntu Desktop 24.04 LTS: Noble Numbat.
+
+### Large Language Models
+
+Large language models are used for doing inference with LlamaIndex. I primarily used the `01-ai/Yi-1.5-9B-Chat` model when developing the application on my PC. The easiest way to start this model is with vLLM's docker image. Before running this, make sure that you set your export your `HUGGING_FACE_HUB_TOKEN`. The following command also assumes that your Hugging Face cache uses the default location (`~/.cache/huggingface`):
+
+```bash
+docker run --runtime nvidia --gpus all \
+    -v ~/.cache/huggingface:/root/.cache/huggingface \
+    --env "HUGGING_FACE_HUB_TOKEN=$HUGGING_FACE_HUB_TOKEN" \
+    -p 8000:8000 \
+    --ipc=host \
+    vllm/vllm-openai:latest \
+    --model 01-ai/Yi-1.5-9B-Chat --trust-remote-code
+```
+
+This model was a great all-purpose model to use for development of this project. I used it as the following:
+
+- Q&A chatbot inference model used with LlamaIndex RAG system
+- Translating from Chinese to English and from English to Chinese
+- LLM for the Continue.dev VSCode plugin used for simple questions while writing code
+
+You can read more about the `01-ai/Yi` model series on [their GitHub repo](https://github.com/01-ai/Yi?tab=readme-ov-file#introduction).
+
+### (small) Vision Language Models
+
+I wrote a simple FastAPI service based on the `Qwen/Qwen2-VL-2B-Instruct` quickstart example [here](https://huggingface.co/Qwen/Qwen2-VL-2B-Instruct#quickstart) using Claude 3.5 Sonnet. Most of the code for this project was written with Cluade 3.5 Sonnet (using their generous free plan!)
+
+TODO: Since I wrote this service, Qwen2.5 models have been released, update this service to use the Qwen2.5 models.
+
+Instructions for starting this service can be found under [`services/qwen2-vl/README.md`](services/qwen2-vl/README.md).
 
 ### Virtual Environment
 
