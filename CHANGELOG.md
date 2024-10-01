@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.6.0](https://github.com/briancaffey/RedLM/compare/v0.5.0...v0.6.0) (2024-10-01)
+
+
+### Features
+
+* **data:** add json files with chapter data, text and translations ([854a619](https://github.com/briancaffey/RedLM/commit/854a6196f85392df548e13756d72f7bca0451ac3))
+* **name:** rename hllm directory to redlm ([2d3f662](https://github.com/briancaffey/RedLM/commit/2d3f662cbc5bc5201191d81365853c8d3771878b))
+
+
+### Bug Fixes
+
+* **git:** add .gitkeep to ui/public/img to keep folder ([dd9e1b8](https://github.com/briancaffey/RedLM/commit/dd9e1b8e043c3a50cddbdca4bb778ec40ef766d2))
+* **git:** add .gitkeep to ui/public/img to keep folder ([74367b1](https://github.com/briancaffey/RedLM/commit/74367b1aa7d9042ea69f9a2167c6eadc44906beb))
+
 ## [0.5.0](https://github.com/briancaffey/HLLM/compare/v0.4.0...v0.5.0) (2024-09-30)
 
 
