@@ -115,7 +115,11 @@ I wrote a simple FastAPI service based on the `Qwen/Qwen2-VL-2B-Instruct` quicks
 
 TODO: Since I wrote this service, Qwen2.5 models have been released, update this service to use the Qwen2.5 models.
 
-Instructions for starting this service can be found under [`services/qwen2-vl/README.md`](services/qwen2-vl/README.md).
+Instructions for starting this service can be found under [`services/qwen2-vl/README.md`](services/qwen2-vl/README.md). This also uses FastAPI, and the command to start it is:
+
+```
+fastapi dev main.py --host 0.0.0.0 --port 8000
+```
 
 ### Virtual Environment
 

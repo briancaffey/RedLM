@@ -50,6 +50,7 @@ def get_llm(model_name=None):
             model=MODEL_NAME,
             api_base=f"http://{LLM_SERVICE_HOST}:{LLM_SERVICE_PORT}/v1",
             api_key="None",
+            max_tokens=1024,
         )
         print("Using local model for inference")
 
