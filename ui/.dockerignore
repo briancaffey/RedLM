@@ -1,0 +1,4 @@
+node_modules
+.nuxt
+public/book/*.json
+public/img/paintings/*.png

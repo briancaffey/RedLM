@@ -31,12 +31,13 @@ export const useMmqaStore = defineStore('mmqa', {
 
   actions: {
     async sendRequest(chapterNumber: string) {
+      const { public: { redlmApiBase } } = useRuntimeConfig()
       try {
         // Append user message to messages array
         this.messages.push({ role: 'user', content: this.query })
         this.isLoading = true
         // Make API request
-        const response = await axios.post('http://localhost:8080/mm-q-and-a', {
+        const response = await axios.post(`${redlmApiBase}/mm-q-and-a`, {
           prompt: this.query,
           image: this.base64ImageData,
           chapter: chapterNumber
