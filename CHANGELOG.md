@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.7.0](https://github.com/briancaffey/RedLM/compare/v0.6.0...v0.7.0) (2024-10-05)
+
+
+### Features
+
+* **article:** add initial draft of article and images ([3413882](https://github.com/briancaffey/RedLM/commit/34138825f052509442daa9e30044bff0bca5d108))
+* **docker:** add docker config config for ui app ([0585afd](https://github.com/briancaffey/RedLM/commit/0585afd337cef6bb3b979a22dd706c8c83f9fdd9))
+* **docker:** add docker config for redlm-api fastapi backend ([cc0ac00](https://github.com/briancaffey/RedLM/commit/cc0ac006c61f635ea3cb58af7a139c44da3b77a6))
+* **docs:** update readme with instructions on how to start inferences services locally for llm and vlm ([cab78c6](https://github.com/briancaffey/RedLM/commit/cab78c6c3d208480dba30254d2f73d0d63f5768d))
+
+
+### Bug Fixes
+
+* **llm:** add max_tokens to local llm config and LLM_NAME env var ([063d2ae](https://github.com/briancaffey/RedLM/commit/063d2ae26be0593f4e00457c929e5f43c59351d6))
+
 ## [0.6.0](https://github.com/briancaffey/RedLM/compare/v0.5.0...v0.6.0) (2024-10-01)
 
 
