@@ -1,0 +1,18 @@
+services:
+  app:
+    build:
+      context: ui
+      dockerfile: Dockerfile
+      target: build
+    container_name: redlm-ui
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./ui:/app  # Mount the current directory to /app in the container
+      - /app/node_modules  # Avoid overwriting the node_modules inside the container
+      # mount the json and image files from the backend into the ui container
+      - ./redlm/data/book/:/app/public/book
+      - ./redlm/data/paintings/:/app/public/img/paintings
+    ports:
+      - "3001:3000"  # Expose the app on port 3000
+    command: yarn dev --host  # Run the Nuxt dev server, use --host to expose on 0.0.0.0

@@ -41,7 +41,8 @@ export const useQAStore = defineStore('qa', {
       const q = this.query;
       this.query = '';
       try {
-        const response = await axios.post('http://localhost:8080/q-and-a', {
+        const { public: { redlmApiBase } } = useRuntimeConfig()
+        const response = await axios.post(`${redlmApiBase}/q-and-a`, {
           query: q
         })
 
