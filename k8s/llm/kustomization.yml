@@ -1,0 +1,5 @@
+resources:
+  - hf-secret.yml
+  - storage.yml
+  - deployment.yml
+  - service.yml

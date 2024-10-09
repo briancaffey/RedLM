@@ -2,7 +2,9 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - qwen2-vl
+  - namespace.yaml
+  - vlm
+  - llm
 
 configMapGenerator:
   - name: redlm-config
@@ -12,6 +14,7 @@ configMapGenerator:
 # instead of hard-coding values in kubernetes manifests, we can replace placeholder values using kustomize
 # https://kubectl.docs.kubernetes.io/references/kustomize/kustomization/replacements/
 replacements:
+  # VLM
   - source:
       kind: ConfigMap
       name: redlm-config
@@ -40,5 +43,36 @@ replacements:
       - select:
           kind: Secret
           name: huggingface-secret
+        fieldPaths:
+          - data.HUGGING_FACE_HUB_TOKEN
+  # LLM
+  - source:
+      kind: ConfigMap
+      name: redlm-config
+      fieldPath: data.NODE_NAME_LLM
+    targets:
+      - select:
+          kind: PersistentVolume
+          name: huggingface-pv-llm
+        fieldPaths:
+          - spec.nodeAffinity.required.nodeSelectorTerms.0.matchExpressions.0.values.0
+  - source:
+      kind: ConfigMap
+      name: redlm-config
+      fieldPath: data.PV_PATH_LLM
+    targets:
+      - select:
+          kind: PersistentVolume
+          name: huggingface-pv-llm
+        fieldPaths:
+          - spec.local.path
+  - source:
+      kind: ConfigMap
+      name: redlm-config
+      fieldPath: data.HUGGING_FACE_HUB_TOKEN_BASE64
+    targets:
+      - select:
+          kind: Secret
+          name: huggingface-secret-llm
         fieldPaths:
           - data.HUGGING_FACE_HUB_TOKEN
