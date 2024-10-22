@@ -39,6 +39,12 @@ In this project I focused on three applications of language models:
 2. A Q&A bot that can answer questions about the book providing references to the specific paragraphs used to give answers
 3. An image-based Q&A bot that can answer questions about sections of paintings that depict scenes from each of the book’s chapters.
 
+## NotebookLM
+
+I took this article and fed it to NotebookLM to create a short podcast-style dialog that describes the project:
+
+![NotebookLM](/static/redlm/notebooklm.png)
+
 ## How I built RedLM
 
 The core application consists of two parts: a web UI built with Nuxt and Vue 3 and a backend API built with FastAPI and LlamaIndex. There are lots of great tools for building full-stack AI applications such as Gradio and Streamlit, but I wanted to build with the web tools that I’m most familiar with and that provide the most flexibility. These frameworks (Nuxt and FastAPI) are simple and effective and they allowed me to develop quickly. Most of the code for this project was written by AI. I used OpenAI’s ChatGPT 4o, Anthropic’s Claude 3.5 Sonnet and 01.AI’s Yi-1.5-9B-Chat model. This means that I could write a prompt for a single-file-component in Vue or an API route for FastAPI and get perfectly-written code often on the first prompt.
@@ -180,7 +186,7 @@ This search led me to find [a set of 1000 multiple choice questions about Dream 
 - Four answer choices - some of the questions had more than four answer choices. I filtered questions with more than four answer choices to keep the evaluation simple. This would allow me to assume that random answer choices would have a 25% chance of being correct.
 - Only one answer - some questions had more than one answer. This would also help keep the evaluation logic simple.
 
-![Multiple Choice Questions from Dream of the Red Chamber Test](/static/redlm/hlm_mcp.png)
+![Multiple Choice Questions from Dream of the Red Chamber Test](/static/redlm/hlm_mcq.png)
 
 Multiple choice questions from a Dream of the Red Chamber test (examcoo.com)
 
@@ -356,15 +362,44 @@ The NVIDIA API catalog doesn’t have every model in every size, however. For ex
 
 ## My local inference stack (RTX)
 
-Another limitation of the NVIDIA API catalog is the number of free credits given for a trial account. Using 1 credit per API call, I would use up the 1000 credits very quickly when running scripts like translation or the RAG evaluation. The same would be true with rate limits of the OpenAI API. That’s why running LLMs locally is still an important part of the development cycle for this type of project.
+![RTX PCs](/static/redlm/rtxpcs.png)
 
-This project primarily uses two models: a large language model and a vision language models. Running the Yi-1.5-9B-Chat model from [01.AI](http://01.AI) takes up just about all of the GPU memory on one of my RTX 4090 PCs, so I had to run the vision model on another PC. In a previous project, I used Kubernetes to manage lots of different inference services: LLMs, ComfyUI, ChatTTS and MusicGen for making AI videos.
+Two of the RTX PCs in my home network: `a1` and `a3`. `a1` was the first PC I built by myself and was the beginning of my GeForce journey. Luckily I built it with an over-provisioned PSU, so it can use a 4090 FE card! The front panel doesn't fit, however.
+
+One limitation of the NVIDIA API catalog is the number of free credits given for a trial account. Using 1 credit per API call, I would use up the 1000 credits very quickly when running scripts like translation or the RAG evaluation. The same would be true with rate limits of the OpenAI API. That’s why running LLMs locally is still an important part of the development cycle for this type of project.
+
+
+This project primarily uses two models: a large language model and a vision language models. Running the Yi-1.5-9B-Chat model from [01.AI](http://01.AI) takes up just about all of the GPU memory on one of my RTX 4090 PCs, so I had to run the vision model on another PC. In a previous project, I used Kubernetes to manage lots of different inference services: LLMs, ComfyUI, ChatTTS and MusicGen for making AI videos and I found it to a nice way to manage different containerized inference services.
+
+```
+brian@a3:~$ microk8s kubectl get no -o wide
+NAME   STATUS   ROLES    AGE    VERSION   INTERNAL-IP     EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION     CONTAINER-RUNTIME
+a1     Ready    <none>   4d4h   v1.30.5   192.168.5.182   <none>        Ubuntu 24.04.1 LTS   6.8.0-45-generic   containerd://1.6.28
+a2     Ready    <none>   11d    v1.30.5   192.168.5.96    <none>        Ubuntu 24.04.1 LTS   6.8.0-45-generic   containerd://1.6.28
+a3     Ready    <none>   11d    v1.30.5   192.168.5.173   <none>        Ubuntu 24.04.1 LTS   6.8.0-45-generic   containerd://1.6.28
+```
 
 In the RedLM GitHub repo I included kubernetes manifests that show how to run the LLM and VLM across two different computers. I used Kustomize as a way to replace dynamic values in the YAML files for different resources. The kubernetes set up is experimental; the LLM and VLM can more reliably be run with `docker run` commands.
 
 ![k8s dashboard for local inference services](/static/redlm/k8s-dashboard.png)
 
-I had a lot of driver issues when trying to get kubernetes to run the vLLM container for the Yi LLM.
+I had a lot of driver issues when trying to get kubernetes to run the vLLM container for the Yi LLM. I struggled with the following error message when trying to run the `vllm` LLM service:
+
+> RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 804: forward compatibility was attempted on non supported HW
+
+I tried uninstalling and reinstalling different versions of the NVIDIA drivers and CUDA but kept seeing the same message once the server would try to start up in the vLLM container logs. Rebooting my PC didn't work either. I saw a recommendation to turn off securet boot in BIOS. I didn't turn it on, but having nothing else to try I went into the BIOS settings and found that there were some keys configured in the secure boot section. After I deleted these keys and reboot, everything seemed to work normally. I'm not sure why my PC was in secure boot mode, though!
+
+## Remote Local Development
+
+I use Tailscale for VPN access into my home network. This allows me to use VSCode to connect to folders on my PCs (Remote-SSH) and also lets me do things like portforwarding. For example, I can run the `microk8s dashboard-proxy` command and then port forward port `10443` to the remote IP for access to the Kubernetes dashboard with the following command:
+
+```
+ssh -L 10443:100.69.6.58:10443 brian@100.69.6.58
+```
+
+## CloudFlare Tunnels
+
+CloudFlare Tunnels is another product that is helpful for building, testing and sharing applications that run on my RTX PC cluster. It allows me to safely expose a service running on my home network to the public internet. For example, I can point [https://redlm.briancaffey.com](https://redlm.briancaffey.com) to `localhost:3000` where I'm running my Nuxt site locally. This serves traffic through CloudFlare's servers; traffic from the internet does go into my home network. I do this for a number of other services that run on my home PCs, such as image generation, etc.
 
 ## The success of Black Myth: Wukong
 
