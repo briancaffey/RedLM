@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.8.0](https://github.com/briancaffey/RedLM/compare/v0.7.0...v0.8.0) (2024-10-22)
+
+
+### Features
+
+* **article:** add article complete rough draft in markdown format with images ([c3741df](https://github.com/briancaffey/RedLM/commit/c3741dfe30cdcd7b010decf706cb789e26e6aec9))
+* **article:** rtx pc cluster, tailscale, notebooklm, cloudflare tunnels ([c4af786](https://github.com/briancaffey/RedLM/commit/c4af786883c04edf79c2686f13a9f10a8adc10c9))
+* **k8s:** add qwen2-vl service kubernetes config using kustomize ([738afd3](https://github.com/briancaffey/RedLM/commit/738afd3a03961ec2fdef45058e6c0a08cc52cefb))
+* **kustomize:** add llm service to kustomize configuration ([ff84540](https://github.com/briancaffey/RedLM/commit/ff84540949b2af2b72b88387a39d5711d2b832d0))
+
 ## [0.7.0](https://github.com/briancaffey/RedLM/compare/v0.6.0...v0.7.0) (2024-10-05)
 
 
