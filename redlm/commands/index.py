@@ -11,7 +11,10 @@ import json
 from llama_index.core import Document, Settings, VectorStoreIndex
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 
-Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-zh-v1.5")
+
+en_embedding_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
+zh_embedding_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-zh-v1.5")
+# Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-zh-v1.5")
 
 
 def persist_index():
@@ -23,14 +26,22 @@ def persist_index():
             paragraphs = data["paragraphs"]
 
         for i, p in enumerate(paragraphs):
-            document = Document(
-                text=p["original"],
-                metadata={"chapter": str(chapter), "paragraph": str(i)},
-                metadata_seperator="::",
-                metadata_template="{key}=>{value}",
-                text_template="Metadata: {metadata_str}\n-----\nContent: {content}",
-            )
-            documents.append(document)
+            for lang in ["original", "chinese", "english"]:
+                document = Document(
+                    text=p[lang],
+                    metadata={
+                        "chapter": str(chapter),
+                        "paragraph": str(i),
+                        "language": lang,
+                    },
+                    metadata_seperator="::",
+                    metadata_template="{key}=>{value}",
+                    text_template="Metadata: {metadata_str}\n-----\nContent: {content}",
+                    embed_model=(
+                        en_embedding_model if lang == "english" else zh_embedding_model
+                    ),
+                )
+                documents.append(document)
 
     # Create the index and query engine
     # index = VectorStoreIndex.from_documents(documents)
