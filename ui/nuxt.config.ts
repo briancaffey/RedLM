@@ -11,7 +11,7 @@ export default defineNuxtConfig({
   ],
   runtimeConfig: {
     public: {
-      redlmApiBase: 'http://localhost:8080', // override with `NUXT_PUBLIC_REDLM_API_BASE` in `ui/.env` (see `/ui/.env.sample`)
+      redlmApiBase: 'http://localhost:8080', // override with `NUXT_PUBLIC_REDLM_API_BASE` in `ui/.env` (see `/ui/.env.example`)
     }
   },
   shadcn: {
