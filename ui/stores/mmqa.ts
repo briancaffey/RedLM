@@ -19,6 +19,7 @@ interface Message {
   role: 'user' | 'assistant'
   content: string
   metadata?: Metadata[]
+  imageDescription?: string;
 }
 
 export const useMmqaStore = defineStore('mmqa', {
@@ -46,7 +47,7 @@ export const useMmqaStore = defineStore('mmqa', {
         // this.isLoading = false
 
         // Append assistant response to messages array
-        this.messages.push({ role: 'assistant', content: response.data.response, metadata: response.data.metadata })
+        this.messages.push({ role: 'assistant', content: response.data.response, metadata: response.data.metadata, imageDescription: response.data.image_desc })
 
         return response.data
       } catch (error) {

@@ -41,6 +41,16 @@
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
+      <TooltipProvider v-if="message.imageDescription">
+        <Tooltip>
+          <TooltipTrigger asChild>
+              <Badge class="bg-gray-700 hover:bg-gray-800 mr-2 mt-2 px-4 py-2 text-base">图片内容&nbsp;&nbsp;🖼️</Badge>
+          </TooltipTrigger>
+          <TooltipContent class="max-w-60">
+            {{ message.imageDescription }}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
       </div>
       <LoadingSpinner class="justify-center" v-if="mmqaStore.isLoading" />
       <div class="flex flex-col space-y-2">

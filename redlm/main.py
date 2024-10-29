@@ -48,6 +48,7 @@ class DocumentMetadata(BaseModel):
 class QAQueryResponse(BaseModel):
     response: str
     metadata: Optional[List[DocumentMetadata]] = None
+    image_desc: Optional[str] = None
 
 
 class MutliModalRequest(BaseModel):
@@ -116,7 +117,7 @@ async def mm_q_and_a_v2(req_data: MutliModalRequest):
         print(response)
 
         return QAQueryResponse(
-            response=response[0].message.content, metadata=response[1]
+            response=response[0].message.content, metadata=response[1], image_desc=image_description
         )
     except Exception as e:
         print(e)

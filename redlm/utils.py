@@ -133,8 +133,12 @@ def process_mm_qa_request(req_data):
     """
 
     image_b64 = req_data.image
-    # TODO: should the prompt (user input from image Q&A form) be used below in the user message?
     prompt = req_data.prompt
+
+    cn_prompt = "这张图片是一幅中国古典绘画的一部分。"
+    en_prompt = "This is an image of a classical Chinese painting. "
+
+    image_description_prompt = cn_prompt if is_chinese_text(prompt) else en_prompt
 
     image_b64 = fix_base64_padding(image_b64.split(",")[1])
 
@@ -165,7 +169,7 @@ def process_mm_qa_request(req_data):
                 {
                     "role": "user",
                     # This image is part of a classical Chinese painting. Please describe the content of this image:
-                    "content": f'这张图片是一幅中国古典绘画的一部分。请描述这张图片的内容： <img src="data:image/png;base64,{image_b64}" />',
+                    "content": f'{image_description_prompt}\n{prompt} <img src="data:image/png;base64,{image_b64}" />',
                 }
             ],
             "max_tokens": 1024,
@@ -221,3 +225,13 @@ def process_mm_qa_request(req_data):
         )  # Sending as multipart/form-data
 
         return vision_model_response.json()["response"]
+
+def is_chinese_text(text: str) -> bool:
+    """
+    This is a simple helper function that is used to determine which prompt to use
+    depending on the language of the original user query
+    """
+    chinese_count = sum(1 for char in text if '\u4e00' <= char <= '\u9fff')
+    english_count = sum(1 for char in text if 'a' <= char.lower() <= 'z')
+
+    return chinese_count > english_count

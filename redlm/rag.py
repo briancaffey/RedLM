@@ -18,7 +18,7 @@ from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 
 from llama_index.llms.nvidia import NVIDIA
 from llama_index.llms.openai_like import OpenAILike
-from .utils import get_llm, get_index
+from .utils import get_llm, get_index, is_chinese_text
 
 # LLMs
 
@@ -52,6 +52,15 @@ q_and_a_prompt = PromptTemplate(
     "问题：{query_str}\n"
 )
 
+q_and_a_prompt_english = PromptTemplate(
+    "This is some related reference material:\n"
+    "---------------------\n"
+    "{context_str}\n"
+    "---------------------\n"
+    "Based on the above material, answer the following question:\n"
+    "Question: {query_str}\n"
+)
+
 mm_q_and_a_prompt = PromptTemplate(
     "这是书中相关的内容：\n"
     "{context_str}\n"
@@ -61,6 +70,17 @@ mm_q_and_a_prompt = PromptTemplate(
     "{query_str}\n"
     "---------------------\n"
     "根据上述的信息，尽量解释上说的场景和书的关系。"
+)
+
+mm_q_and_a_prompt_english = PromptTemplate(
+    "Here is relevant content from the book:\n"
+    "{context_str}\n"
+    "---------------------\n"
+    "Below is the description of a scene:\n"
+    "---------------------\n"
+    "{query_str}\n"
+    "---------------------\n"
+    "Based on the information provided above, try to explain the relationship between the described scene and the book content."
 )
 
 
@@ -91,7 +111,16 @@ class QAndAQueryEngine(CustomQueryEngine):
     qa_prompt: PromptTemplate
 
     def custom_query(self, query_str: str):
+
+        if is_chinese_text(query_str):
+            print("Text is Chinese")
+            prompt = q_and_a_prompt
+        else:
+            print("Text is English")
+            prompt = q_and_a_prompt_english
+
         nodes = self.retriever.retrieve(query_str)
+
         metadata = []
         # Collect the metadata into a list of dicts so that it can be sent to UI for references
         for node in nodes:
@@ -108,7 +137,7 @@ class QAndAQueryEngine(CustomQueryEngine):
             [
                 ChatMessage(
                     role="user",
-                    content=q_and_a_prompt.format(
+                    content=prompt.format(
                         context_str=context_str, query_str=query_str
                     ),
                 )

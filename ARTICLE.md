@@ -25,7 +25,7 @@ comments: true
 
 RedLM is a new way to study art and literature powered by artificial intelligence. It is an application that applies LLMs to the study of one of China’s most famous literary works: Dream of the Red Chamber. It uses leading Chinese language models and vision language models from Chinese AI groups including Alibaba’s Qwen team, Baichuan Intelligence Technology and 01.AI. RedLM uses tools, techniques and services from NVIDIA and LlamaIndex including NVIDIA NIMs, Retrieval Augmented Generation and Multi-Modal RAG with vision language models. This project is my submission for the NVIDIA and LlamaIndex Developer Contest.
 
-There are This article will cover how I built the project, challenges I faced and some of the lessons I learned while working with NVIDIA and LlamaIndex technologies.
+This article will cover how I built the project, challenges I faced and some of the lessons I learned while working with NVIDIA and LlamaIndex technologies.
 
 ## What is RedLM?
 
@@ -49,7 +49,7 @@ I took this article and fed it to NotebookLM to create a short podcast-style dia
 
 The core application consists of two parts: a web UI built with Nuxt and Vue 3 and a backend API built with FastAPI and LlamaIndex. There are lots of great tools for building full-stack AI applications such as Gradio and Streamlit, but I wanted to build with the web tools that I’m most familiar with and that provide the most flexibility. These frameworks (Nuxt and FastAPI) are simple and effective and they allowed me to develop quickly. Most of the code for this project was written by AI. I used OpenAI’s ChatGPT 4o, Anthropic’s Claude 3.5 Sonnet and 01.AI’s Yi-1.5-9B-Chat model. This means that I could write a prompt for a single-file-component in Vue or an API route for FastAPI and get perfectly-written code often on the first prompt.
 
-This project supports hybrid AI inference, meaning that the AI inference can be done either on local RTX PCs or using NVIDIA’s Cloud APIs from `build.nvidia.com`. I used PCs with NVIDIA GeForce RTX 4090 GPUs to do inference with language and vision models, and with a change of configuration, I was able to do the same inference using NVIDIA’s API endpoints.
+This project supports hybrid AI inference, meaning that the AI inference can be done either on local RTX PCs or using NVIDIA’s Cloud APIs from `build.nvidia.com`. I used PCs with NVIDIA GeForce RTX 4090 GPUs to do inference with language and vision models, and with a change of configuration, I was able to do similar inference using NVIDIA’s API endpoints.
 
 ## Translating Dream of the Red Chamber with TensorRT-LLM
 
@@ -175,7 +175,65 @@ class QAndAQueryEngine(CustomQueryEngine):
         return response, metadata
 ```
 
-This chapter number and paragraph number are added to the document as metadata during the indexing step which I run once via a script before starting the FastAPI server.
+This chapter number, paragraph number and version (original, Mandarin Chinese and English) are added to the document as metadata during the indexing step which runs via a script before starting the FastAPI server. Here's how I indexed the original text and translations with LlamaIndex:
+
+```python
+en_embedding_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
+zh_embedding_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-zh-v1.5")
+
+def persist_index():
+    documents = []
+    for chapter in range(1, 121):
+        with open(f"data/book/{chapter}.json", "r") as f:
+            data = json.load(f)
+            paragraphs = data["paragraphs"]
+
+        for i, p in enumerate(paragraphs):
+            for lang in ["original", "chinese", "english"]:
+                document = Document(
+                    text=p[lang],
+                    metadata={
+                        "chapter": str(chapter),
+                        "paragraph": str(i),
+                        "language": lang,
+                    },
+                    metadata_seperator="::",
+                    metadata_template="{key}=>{value}",
+                    text_template="Metadata: {metadata_str}\n-----\nContent: {content}",
+                    embed_model=(
+                        en_embedding_model if lang == "english" else zh_embedding_model
+                    ),
+                )
+                documents.append(document)
+
+    index = VectorStoreIndex.from_documents(documents)
+    index.storage_context.persist(persist_dir="storage")
+
+if __name__ == "__main__":
+    persist_index()
+```
+
+For the embedding models, I used the small BAAI General Embedding models (BGE) for English and Chinese. BAAI is the Beijing Academy of Artificial Intelligence, and I leared about this organization through some of the examples on the LlamaIndex site that use BAAI embeddings. There are multi-lingual embedding models (e.g. `BAAI/bge-m3`), setting the embedding model on a per-document basis is possible and in some cases it might be preferrable to using a single embedding model for all documents.
+
+### Other examples of RAG with English questions
+
+One interesting design question I faced was how to support answering questions in both English and Chinese. I initially built the Q&A bot with only Chinese language support. Later, I added a very simple helper function to determine if the input text is Chinese:
+
+```python
+def is_chinese_text(text: str) -> bool:
+    """
+    This is a simple helper function that is used to determine which prompt to use
+    depending on the language of the original user query
+    """
+    chinese_count = sum(1 for char in text if '\u4e00' <= char <= '\u9fff')
+    english_count = sum(1 for char in text if 'a' <= char.lower() <= 'z')
+
+    return chinese_count > english_count
+```
+
+Then I would select select the version of the prompt to use in the QueryEngine, either Chinese or English. This allowed the Q&A bot to answer questions in either Chinese or English, and it does not require translating back and forth between Chinese and English. However, this method relies on high-quality translations, so I don't expect English language questions to be answered as accurately as Chinese language questions. Here's an example of a question and answer in English. The referenced materials include paragraphs from the English translation:
+
+![Multi-modal Q&A example 1](/static/redlm/qa_example_01.png)
 
 ## RedLM RAG Evaluation
 
@@ -203,7 +261,7 @@ Here are some results and other observations from this experiment:
 - I used the `01-ai/Yi-1.5-9B-Chat` model for this test, but I probably should have used the base model rather than the chat model.
 - Some questions would not be capable of being answered by RAG. For example, some of the questions are about film renditions of the novel. Most of the questions seemed relevant to the content of the book, so I didn’t bother to filter out the questions that were not directly related to the book’s content.
 
-Here is an example of a question that the LLM test script answered incorrectly and the LLM + RAG test script answered correctly.
+Here is an example of a question that the LLM test script answered *incorrectly* and the LLM + RAG test script answered **correctly**.
 
 > 秦钟的父亲是如何死的？
 >
@@ -329,6 +387,15 @@ def get_query_engine_for_multi_modal(filters):
 
 This seemed to work well for my use case, but it might not be a best practice, and it might not be efficient at a bigger scale.
 
+### Multi-modal Q&A examples
+
+Here are some more examples of results from different types of questions from the multi-modal Q&A bot.
+
+The response to the following query did a good job of combining information gathered from the image description and image from related passages.
+
+![Multi-modal Q&A example 2](/static/redlm/qa_example_02.png)
+![Multi-modal Q&A example 3](/static/redlm/qa_example_03.png)
+
 ## LlamaIndex Developer Experience
 
 Overall, I found the LlamaIndex documentation to be very helpful. Before using LlamaIndex for this project I had used LangChain to build a RAG POC, but I didn’t get very good results. I love how the LlamaIndex documentation has a 5-line starter example for building a RAG system:
@@ -410,6 +477,8 @@ The novel blends elements of adventure, mythology, and spiritual allegory, with 
 This game has set world records for numbers of concurrent players, and it has rewritten the narrative around what is capable with offline single-player games and on top of that it is developed by an obscure game studio from Shenzhen, China.
 
 ![Black Myth: Wukong](/static/redlm/wukong.png)
+
+Three renditions of Journey West: Songokū (The Monkey King) polychrome woodblock (surimono) (1824) by Yashima Gakutei (1786–1868), Black Myth: Wukong video game by Game Science (2024), Journey to the West TV series by CCTV (1982-2000)
 
 ## RedLM video
 
