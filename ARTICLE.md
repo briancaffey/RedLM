@@ -175,6 +175,8 @@ class QAndAQueryEngine(CustomQueryEngine):
         return response, metadata
 ```
 
+### Indexing the book data
+
 This chapter number, paragraph number and version (original, Mandarin Chinese and English) are added to the document as metadata during the indexing step which runs via a script before starting the FastAPI server. Here's how I indexed the original text and translations with LlamaIndex:
 
 ```python
@@ -214,6 +216,13 @@ if __name__ == "__main__":
 ```
 
 For the embedding models, I used the small BAAI General Embedding models (BGE) for English and Chinese. BAAI is the Beijing Academy of Artificial Intelligence, and I leared about this organization through some of the examples on the LlamaIndex site that use BAAI embeddings. There are multi-lingual embedding models (e.g. `BAAI/bge-m3`), setting the embedding model on a per-document basis is possible and in some cases it might be preferrable to using a single embedding model for all documents.
+
+### Milvus Vector Database
+
+I did most of the development for this project using the in-memory VectorIndexStore provided by LlamaIndex. This worked well, but making any changes to the FastAPI server required the data to be reloaded into memory which took several seconds each time. This can really hinder a good development flow, so I looked into using an external service for the vector database instead of running it in memory.
+
+Using the Milvus docker compose example I was able to set up an external vector database based on etcd and minio. Milvus also provides a Helm chart for running their vector database, this would be helpful if I was going to be running everything in Kubernetes (inference, vector database and application containers).
+
 
 ### Other examples of RAG with English questions
 

@@ -11,6 +11,8 @@ import json
 from llama_index.core import Document, Settings, VectorStoreIndex
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 
+from utils import get_index
+
 
 en_embedding_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
 zh_embedding_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-zh-v1.5")
@@ -45,13 +47,16 @@ def persist_index():
 
     # Create the index and query engine
     # index = VectorStoreIndex.from_documents(documents)
-    index = VectorStoreIndex.from_documents(documents)
+    index, is_milvus = get_index()
 
-    # store context in storage directory
-    # TODO: check to see if there are any JSON files in the storage directory
-    # Build and persist the VectorStoreIndex
-    # for now, run `python -m commands.index` before running the server
-    index.storage_context.persist(persist_dir="storage")
+    if is_milvus:
+        VectorStoreIndex.from_documents(documents, index.storage_context)
+    else:
+        # store context in storage directory
+        # TODO: check to see if there are any JSON files in the storage directory
+        # Build and persist the VectorStoreIndex
+        # for now, run `python -m commands.index` before running the server
+        index.storage_context.persist(persist_dir="storage")
 
 
 if __name__ == "__main__":

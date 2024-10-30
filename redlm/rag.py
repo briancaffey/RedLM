@@ -30,7 +30,7 @@ completion_model = get_llm(model_name=COMPLETION_MODEL)
 # defaults to baichuan-inc/baichuan2-13b-chat or 01-ai/Yi-1.5-9B-Instruct
 # depending on NVIDIA_API_KEY
 model = get_llm()
-index = get_index()
+index, _ = get_index()
 
 
 qa_prompt = PromptTemplate(
@@ -121,6 +121,10 @@ class QAndAQueryEngine(CustomQueryEngine):
 
         nodes = self.retriever.retrieve(query_str)
 
+        print("Node info...")
+        print(nodes)
+        print(len(nodes))
+
         metadata = []
         # Collect the metadata into a list of dicts so that it can be sent to UI for references
         for node in nodes:
@@ -137,9 +141,7 @@ class QAndAQueryEngine(CustomQueryEngine):
             [
                 ChatMessage(
                     role="user",
-                    content=prompt.format(
-                        context_str=context_str, query_str=query_str
-                    ),
+                    content=prompt.format(context_str=context_str, query_str=query_str),
                 )
             ]
         )
@@ -176,11 +178,9 @@ def get_q_and_a_query_engine():
     """
 
     # Configure Settings
-    Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-zh-v1.5")
     Settings.llm = model
 
-    retriever = index.as_retriever()
-
+    retriever = index.as_retriever(similarity_top_k=2)
     synthesizer = get_response_synthesizer(response_mode="compact")
 
     query_engine = QAndAQueryEngine(
@@ -199,7 +199,7 @@ def get_query_engine_for_multi_modal(filters):
     The index is the index from the global scope in main.py
     Filters are determined in the query parameters for the route that uses this engine
     """
-    retriever = index.as_retriever(filters=filters)
+    retriever = index.as_retriever(filters=filters, similarity_top_k=2)
     synthesizer = get_response_synthesizer(response_mode="compact")
     try:
         query_engine = QAndAQueryEngine(

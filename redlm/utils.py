@@ -2,7 +2,10 @@ import os
 import requests, base64
 import base64
 from io import BytesIO
+from dotenv import load_dotenv
 from PIL import Image
+
+load_dotenv()
 
 
 from llama_index.llms.nvidia import NVIDIA
@@ -11,8 +14,10 @@ from llama_index.core import (
     load_index_from_storage,
     Settings,
     StorageContext,
+    VectorStoreIndex,
 )
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+from llama_index.vector_stores.milvus import MilvusVectorStore
 
 
 def get_llm(model_name=None):
@@ -61,17 +66,41 @@ def get_llm(model_name=None):
 
 def get_index():
     """
-    Loads the index from disk into memory and returns the index
-    - used when defining query engines
-    - TODO: replace with Milvus and use either external Milvus service or Milvus Lite
+    Gets the index either from a remote Milvus server or from in-memory VectorIndexStore
+    Returns the index and a boolean value: True if the index is a Milvus server, otherwise False
+    This utility function is used when defining query engines in rag.py and the script useed for indexing
     """
+    VECTORDB_SERVICE_HOST = os.environ.get(
+        "VECTORDB_SERVICE_HOST", "localhost"
+    )  # localhost
+    VECTORDB_SERVICE_PORT = os.environ.get("VECTORDB_SERVICE_PORT", "19530")  # 19530
+    USE_EXTERNAL_VECTORDB = os.environ.get("USE_EXTERNAL_VECTORDB", False)
     Settings.embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-zh-v1.5")
-    print("Loading index...")
-    storage_context = StorageContext.from_defaults(persist_dir="storage")
-    index = load_index_from_storage(storage_context)
-    print("Finished loading index.")
 
-    return index
+    VECTORDB_URI = None
+    if VECTORDB_SERVICE_HOST and VECTORDB_SERVICE_PORT:
+        VECTORDB_URI = f"http://{VECTORDB_SERVICE_HOST}:{VECTORDB_SERVICE_PORT}"
+
+    if VECTORDB_URI and USE_EXTERNAL_VECTORDB:
+        print("Using Milvus vector database")
+        vector_store = MilvusVectorStore(
+            # BAAI/bge-small-{en,zh}-v1.5 has Dimension of 384, Sequence Length of 512
+            # https://huggingface.co/BAAI/bge-small-zh-v1.5#evaluation
+            uri=VECTORDB_URI,
+            dim=512,
+            overwrite=False,
+        )
+        storage_context = StorageContext.from_defaults(vector_store=vector_store)
+        index = VectorStoreIndex.from_vector_store(
+            vector_store, storage_context=storage_context
+        )
+    else:
+        print("Loading index from storage directory...")
+        storage_context = StorageContext.from_defaults(persist_dir="storage")
+        index = load_index_from_storage(storage_context)
+        print("Finished loading index.")
+
+    return index, bool(USE_EXTERNAL_VECTORDB)
 
 
 def resize_image_b64(image_b64):
@@ -226,12 +255,13 @@ def process_mm_qa_request(req_data):
 
         return vision_model_response.json()["response"]
 
+
 def is_chinese_text(text: str) -> bool:
     """
     This is a simple helper function that is used to determine which prompt to use
     depending on the language of the original user query
     """
-    chinese_count = sum(1 for char in text if '\u4e00' <= char <= '\u9fff')
-    english_count = sum(1 for char in text if 'a' <= char.lower() <= 'z')
+    chinese_count = sum(1 for char in text if "\u4e00" <= char <= "\u9fff")
+    english_count = sum(1 for char in text if "a" <= char.lower() <= "z")
 
     return chinese_count > english_count
