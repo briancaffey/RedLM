@@ -41,21 +41,23 @@ In this project I focused on three applications of language models:
 
 ## NotebookLM
 
-I took this article and fed it to NotebookLM to create a short podcast-style dialog that describes the project:
+I took this article and fed it to NotebookLM to create a short "Deep Dive" podcast episode that describes the project:
 
 ![NotebookLM](/static/redlm/notebooklm.png)
 
+You can listen to this podcast episode here:
+
 ## How I built RedLM
 
-The core application consists of two parts: a web UI built with Nuxt and Vue 3 and a backend API built with FastAPI and LlamaIndex. There are lots of great tools for building full-stack AI applications such as Gradio and Streamlit, but I wanted to build with the web tools that I’m most familiar with and that provide the most flexibility. These frameworks (Nuxt and FastAPI) are simple and effective and they allowed me to develop quickly. Most of the code for this project was written by AI. I used OpenAI’s ChatGPT 4o, Anthropic’s Claude 3.5 Sonnet and 01.AI’s Yi-1.5-9B-Chat model. This means that I could write a prompt for a single-file-component in Vue or an API route for FastAPI and get perfectly-written code often on the first prompt.
+RedLM consists of two parts: a web UI built with Vue 3 using the Nuxt Framework and a backend API built with Python, FastAPI and LlamaIndex. There are lots of great tools for building full-stack AI applications such as Gradio and Streamlit, but I wanted to build with the web tools that I’m most familiar with and that provide the most flexibility. These frameworks (Nuxt and FastAPI) are simple and effective and they allowed me to develop quickly. Most of the code for this project was written by AI. I used OpenAI’s ChatGPT 4o, Anthropic’s Claude 3.5 Sonnet and 01.AI’s Yi-1.5-9B-Chat model. In my development process with AI, I prompted for one logical piece of the application at a time, such as one API route, one Vue component, one pinia store or one utility function, for example.
 
-This project supports hybrid AI inference, meaning that the AI inference can be done either on local RTX PCs or using NVIDIA’s Cloud APIs from `build.nvidia.com`. I used PCs with NVIDIA GeForce RTX 4090 GPUs to do inference with language and vision models, and with a change of configuration, I was able to do similar inference using NVIDIA’s API endpoints.
+This project embraces a hybrid AI inference model, meaning that the AI inference can be done either on local RTX PCs or using NVIDIA’s Cloud APIs from `build.nvidia.com` depending on configuration via environment variables. I used PCs with NVIDIA GeForce RTX 4090 GPUs to do inference with language and vision models, and with a change of configuration, I was able to do similar inference using NVIDIA’s API endpoints.
 
 ## Translating Dream of the Red Chamber with TensorRT-LLM
 
-Translation is often mentioned as one of the capabilities of bilingual LLMs from China. I wanted to try translating this book from Chinese to English, but I also wanted to better understand the meaning of the original text written in vernacular Chinese.
+Translation is often mentioned as one of the capabilities of bilingual LLMs from China. I wanted to try translating this book from Chinese to English, but I also wanted to better understand the meaning of the original text written in vernacular Chinese. Written vernacular Chinese is essentially a form of Chinese that closely resembles spoken Chinese. The use of Baihua in literary works marked a significant cultural shift that started to make literature and eduction more accessible. Before the emrgence of written vernacular Chinese, Chinese literature was dominated by Classical Chinese (Wenyanwen) which is a more consice, ambiguous and specialized for of languages that assumes an understanding of ancient texts and Confucian classics.
 
-I decided to try both: first, I used LLMs to rewrite the original text in simple, modern Mandarin Chinese and then second, I translated the modern Mandarin version into English.
+Chinese large language models are well versed in Classical Chinese, written Chinese vernacular and modern Mandarin Chinese. I decided to try rewrite the original text in simple, modern Mandarin Chinese and then using this new modern Mandarin version, translate the story into English.
 
 Dream of the Red Chamber is a large book. It is composed of over 800,000 Chinese characters, using 4303 unique Chinese characters. It has 120 chapters and a total of 3996 paragraphs. Here is a histogram showing the number of characters per paragraph.
 
@@ -105,10 +107,10 @@ It was difficult to get good results consistently. Here are some observations I 
 - Some of the translated paragraphs were perfect
 - some translated paragraphs would randomly hallucinate the same phrase over and over again
 - Some requests to translate text to English would reply in Mandarin Chinese rather than in English
-- Sometimes I would even see code generated when asking for a translation
-- The names of characters were sometimes translated inconsistently.
+- Sometimes I would even see computer code generated when asking for a translation
+- The names of characters were sometimes translated inconsistently, sometimes literally and sometimes using differing versions of pinyin, the Romanization system for transcribing the sounds of Mandarin Chinese
 
-ChatGPT 4o in my experience could handle any translation task flawlessly, but the `Qwen2-7B` model I used had mixed results! The change that I made that seemed to have the biggest impact on translation quality was setting `*max_tokens*=256` in `SamplingParams`. I probably could have used a dynamic value for `max_tokens` based on the size of the current paragraph being translated. I also would have like to set up side-by-side comparisons of translations using different sized models, but rather than spend time on optimizing translation with TensorRT-LLM, I wanted to focus on the main part of this project: Retrieval Augmented Generation with LlamaIndex.
+I found that ChatGPT 4o could handle any Chinese translation task flawlessly, but the `Qwen2-7B` model I used had mixed results! The change that I made that seemed to have the biggest impact on translation quality was setting `*max_tokens*=256` in `SamplingParams`. I probably could have used a dynamic value for `max_tokens` based on the size of the current paragraph being translated. I also would have like to set up side-by-side comparisons of translations using different sized models, but rather than spend time and AWS credits on optimizing translation with TensorRT-LLM, I wanted to focus on the main part of this project: retrieval augmented generation (RAG) with LlamaIndex.
 
 ## Building Q&A bots with RAG using LlamaIndex
 
@@ -118,24 +120,25 @@ My primary object with this project was to implement a simple chat feature that 
 
 The question in the screenshots above is: “What does Jia Baoyu’s father think about him?” The response includes references to paragraphs where Jia Zheng (Baoyu’s father) is discussing his son. I was pretty amazed that the RAG query was able to pull out these two paragraphs. I haven’t read very much of this book at all, but the retrieved documents seemed to be directly related to my query.
 
-By default, LlamaIndex uses cosine similarity as the distance metric for find the vectors representing the documents (paragraphs) that are “closest” to the vector representing the user query.
+*In Dream of the Red Chamber, the relationship between protagonist Jia Baoyu and his father, Jia Zheng, is complex and fraught with tension. Jia Zheng, a strict, traditional Confucian patriarch, embodies values of discipline, scholarly rigor, and duty. He expects his son to excel in his studies and uphold the family’s honor by pursuing an official career in government. Baoyu, however, is sensitive, imaginative, and inclined toward poetry and the company of women, especially his cousins Lin Daiyu and Xue Baochai. This preference clashes with Jia Zheng’s expectations, leading to frequent misunderstandings and disappointment.*
+
+By default, LlamaIndex uses cosine similarity as the distance metric for finding the vectors representing the documents (paragraphs) that are “closest” to the vector representing the user query. This is the central mechanism by which RAG works. LlamaIndex provides an abstraction of this process, hiding the implementation details and allowing rapid development of retreival systems.
 
 ![Cosine Similarity](/static/redlm/cosine_similarity.png)
 
 Source: https://medium.com/@kbdhunga/a-beginners-guide-to-similarity-search-vector-indexing-part-one-9cf5e9171976
 
-Here is some of the code I wrote for this feature that uses LlamaIndex’s `CustomQueryEngine` to fetch the “nodes” from which I get the referenced paragraph text, chapter number and paragraph number.
+Here is some of the code I wrote for the text-based Q&A bot using LlamaIndex’s `CustomQueryEngine` class to fetch the nodes from which I get the referenced paragraph text, chapter number and paragraph number.
 
 ```python
-
 # the prompt used in the query engine below with English translation in the comments
 q_and_a_prompt = PromptTemplate(
     "这是相关的参考资料：\n" # Here is some related reference material:
     "---------------------\n"
-    "{context_str}\n"
+    "{context_str}\n" # The retreived paragraph text will be inserted here
     "---------------------\n"
     "根据上述的参考资料，回答下面的问题\n" # Based on the above reference material, answer the following question:
-    "问题：{query_str}\n" # Question:
+    "问题：{query_str}\n" # Question: (the user question from the text box in the UI is added here)
 )
 
 
@@ -177,7 +180,7 @@ class QAndAQueryEngine(CustomQueryEngine):
 
 ### Indexing the book data
 
-This chapter number, paragraph number and version (original, Mandarin Chinese and English) are added to the document as metadata during the indexing step which runs via a script before starting the FastAPI server. Here's how I indexed the original text and translations with LlamaIndex:
+In the indexing process, embedding models are used to translate chunks of text (paragraphs) into high-dimensional vectors that represent not only the tokens, but the relationships between the tokens. These are the vectors stored in the "Vector Database" used by LlamaIndex. The chapter number, paragraph number and version (original, Mandarin Chinese and English) of each paragraph are added to the database entry as metadata during the indexing step which runs via a script before starting the FastAPI server. Here's how I indexed the original text and translations with LlamaIndex:
 
 ```python
 en_embedding_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
@@ -215,7 +218,7 @@ if __name__ == "__main__":
     persist_index()
 ```
 
-For the embedding models, I used the small BAAI General Embedding models (BGE) for English and Chinese. BAAI is the Beijing Academy of Artificial Intelligence, and I leared about this organization through some of the examples on the LlamaIndex site that use BAAI embeddings. There are multi-lingual embedding models (e.g. `BAAI/bge-m3`), setting the embedding model on a per-document basis is possible and in some cases it might be preferrable to using a single embedding model for all documents.
+For the embedding models, I used the small BAAI General Embedding models (BGE) for English and Chinese. BAAI is the Beijing Academy of Artificial Intelligence, and I leared about this organization through some of the examples on the LlamaIndex site that use BAAI embeddings. There are multi-lingual embedding models (e.g. `BAAI/bge-m3`), but setting the embedding model on a per-document basis is possible and in some cases it might be preferrable to using a single embedding model for all documents.
 
 ### Milvus Vector Database
 
@@ -223,10 +226,9 @@ I did most of the development for this project using the in-memory VectorIndexSt
 
 Using the Milvus docker compose example I was able to set up an external vector database based on etcd and minio. Milvus also provides a Helm chart for running their vector database, this would be helpful if I was going to be running everything in Kubernetes (inference, vector database and application containers).
 
-
 ### Other examples of RAG with English questions
 
-One interesting design question I faced was how to support answering questions in both English and Chinese. I initially built the Q&A bot with only Chinese language support. Later, I added a very simple helper function to determine if the input text is Chinese:
+One interesting design question I faced was how to support answering questions in both English and Chinese. I initially built the Q&A bot with only Chinese language support. Later, I added a simple helper function to determine if the input text is Chinese:
 
 ```python
 def is_chinese_text(text: str) -> bool:
@@ -240,15 +242,15 @@ def is_chinese_text(text: str) -> bool:
     return chinese_count > english_count
 ```
 
-Then I would select select the version of the prompt to use in the QueryEngine, either Chinese or English. This allowed the Q&A bot to answer questions in either Chinese or English, and it does not require translating back and forth between Chinese and English. However, this method relies on high-quality translations, so I don't expect English language questions to be answered as accurately as Chinese language questions. Here's an example of a question and answer in English. The referenced materials include paragraphs from the English translation:
+Then I would select the version of the prompt to use in the QueryEngine, either Chinese or English. This allowed the Q&A bot to answer questions in either Chinese or English, and it does not require translating back and forth between Chinese and English. However, this method relies on high-quality translations, so I don't expect English language questions to be answered as accurately as Chinese language questions. Here are some examples of the Q&A bot answering questions posed in English. The referenced materials include paragraphs from the English translation:
 
 ![Multi-modal Q&A example 1](/static/redlm/qa_example_01.png)
 
 ## RedLM RAG Evaluation
 
-Once I got the Q&A bot set up with RAG I wanted to find a way to test it. I heard that the novel Dream of the Red Chamber is studied widely in Chinese schools, so I searched around for a set of multiple choice questions.
+Examinations have long been a cornerstone of Chinese society, shaping individual aspirations, cultural values, and even government structures. This legacy began with the imperial civil service exams (keju), established during the Sui and Tang dynasties, and carries through in Modern Chinese with the gaokao college entrance examination, both of which allowing for unprecedented meritocratic route to power and prestige. Given how widely studied in China, I was not surprised to find a wealth of examination questions written for students studying Dream of the Red Chamber.
 
-This search led me to find [a set of 1000 multiple choice questions about Dream of the Red Chamber on examcoo.com](https://www.examcoo.com/editor/do/view/id/246401). I wrote a script to parse the questions from the website HTML using ChatGPT (parsing is one of my favorite use cases of coding LLMs!) I filtered out questions based on the following criteria:
+I used [a set of 1000 multiple choice questions about Dream of the Red Chamber on examcoo.com](https://www.examcoo.com/editor/do/view/id/246401) to evaluate the effectiveness of the RAG system I had built with LlamaIndeex. I wrote a script to parse the questions from the website HTML using ChatGPT (parsing HTML is one of my favorite use cases of LLMs!) I filtered out questions based on the following criteria:
 
 - Four answer choices - some of the questions had more than four answer choices. I filtered questions with more than four answer choices to keep the evaluation simple. This would allow me to assume that random answer choices would have a 25% chance of being correct.
 - Only one answer - some questions had more than one answer. This would also help keep the evaluation logic simple.
@@ -257,9 +259,11 @@ This search led me to find [a set of 1000 multiple choice questions about Dream 
 
 Multiple choice questions from a Dream of the Red Chamber test (examcoo.com)
 
-To run the evaluation I set up two scripts. The first script would prompt the LLM to answer the question without any additional information from the RAG system. This served as a baseline to see how well the LLM could do at answering multiple choice questions. The script checks to see if the LLM response contains the letter (A, B, C or D) of the correct answer and keeps track of the number of questions answered correctly.
+To run the evaluation I set up two scripts. The first script would prompt the LLM to answer the question without any additional information from the RAG system. This served as a baseline to see how well the LLM could do at answering multiple choice questions about the book. The script simply checks to see if the LLM response contains the letter (A, B, C or D) of the correct answer and keeps track of the number of questions answered correctly.
 
-Another script was used to test ability of the LLM using RAG. In this script, the prompt sent to the LLM included relevant paragraphs from the book.
+Another script was used to take the test using large language models with RAG. In this script, the prompt sent to the LLM included relevant paragraphs from the book.
+
+![RAG evaluation](/static/redlm/rag_eval.png)
 
 Here are some results and other observations from this experiment:
 
@@ -404,6 +408,8 @@ The response to the following query did a good job of combining information gath
 
 ![Multi-modal Q&A example 2](/static/redlm/qa_example_02.png)
 ![Multi-modal Q&A example 3](/static/redlm/qa_example_03.png)
+
+![Q&A Example with Carriage](/static/redlm/qa_example_carriage.png)
 
 ## LlamaIndex Developer Experience
 
