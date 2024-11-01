@@ -162,3 +162,4 @@ cython_debug/
 #.idea/
 
 !ui/lib/utils/index.ts
+.DS_Store

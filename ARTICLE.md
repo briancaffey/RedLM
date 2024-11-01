@@ -57,6 +57,8 @@ This project embraces a hybrid AI inference model, meaning that the AI inference
 
 Translation is often mentioned as one of the capabilities of bilingual LLMs from China. I wanted to try translating this book from Chinese to English, but I also wanted to better understand the meaning of the original text written in vernacular Chinese. Written vernacular Chinese is essentially a form of Chinese that closely resembles the way Chinese was spoken in imperial China by common people. The use of Baihua in literary works marked a significant cultural shift that started to make literature and eduction more accessible. Before the emrgence of written vernacular Chinese, Chinese literature was dominated by Classical Chinese (Wenyanwen) which is a more consice, ambiguous and specialized for of languages that assumes an understanding of ancient texts and Confucian classics. The difference between vernacular Chinese and modern Mandarin Chinese is somewhat analogous to the different between Shakespearian English (Early Modern English) and Modern English.
 
+![Baihua, Mandarin and English](/static/redlm/translations.png)
+
 Chinese large language models are well versed in Classical Chinese, written Chinese vernacular and modern Mandarin Chinese. I decided to rewrite the original vernacular text in simple, modern Mandarin Chinese and then using this new modern Mandarin version, translate the story into English.
 
 Dream of the Red Chamber is a large book. It is composed of over 800,000 Chinese characters, using 4303 unique Chinese characters. It has 120 chapters and a total of 3996 paragraphs. Here is a histogram showing the number of characters per paragraph.
@@ -513,7 +515,7 @@ Three renditions of Journey West: Songokū (The Monkey King) polychrome woodbloc
 
 I created the video for this project using Blender. Blender is my favorite tool for 3D and its sequencer editor is a great non-linear video editing tool for simple projects. I used the following formula to create the video:
 
-1. Background music: I used the AI music generation service called Suno with the prompt “mystical strange traditional Chinese music from the Qing Dynasty”. Here’s the link to my Suno playlist called “Qing Dynasty Music” where you can find the original song and some other good songs that I generated using this prompt. [Qing Dynasty Music Playlist on Suno](https://suno.com/playlist/863ea0dd-1921-467c-8b69-16dbd126d966)
+1. Background music: I used the AI music generation service called Suno with the prompt “mystical strange traditional Chinese music from the Qing Dynasty”. Here’s the link to my Suno playlist called “Qing Dynasty Music” where you can find the original song and some other good songs that I generated using this prompt. My [Qing Dynasty Music Playlist on Suno](https://suno.com/playlist/863ea0dd-1921-467c-8b69-16dbd126d966)
 2. Outline: For this project, the main sections are the introduction, then explaining each part with a short demo: translation, text-based Q&A, evaluation for text-based Q&A, image-based Q&A, and finally a short outro. I wrote an outline and then ChatGPT helped with filling out the content.
 3. Narration: I used ElevenLabs to narrate the main part of the video using a clone of my voice using the ElevenLabs Voice Lab. The Chinese voices were generated on my computer with an open-source text-to-speech model called ChatTTS.
 4. Images and videos: I gathered images and screen captures of different parts of the project including code snippets, paintings of the book, flow diagrams and screen recordings of the application.
@@ -528,7 +530,7 @@ ChatTTS is one of the most impressive open-source models I have seen for generat
 
 I was planning on streaming the narration audio for Q&A answers using my ChatTTS API service, but I didn’t get around to doing this. Instead, I just used the Gradio application to generate the Chinese narration for Q&A and image Q&A examples included in the video.
 
-## Thoughts about this contest
+## Final thoughts
 
 I’m glad to have had the opportunity to join three NVIDIA developer contests this year. I like the idea of a “developer contest” that takes place over several weeks compared to hackathons that take place over just a few days. Having more time allows you to learn about a new tool or framework at a deeper level and think about how to apply it in a creative project.
 
@@ -536,6 +538,28 @@ I’m glad to have had the opportunity to join three NVIDIA developer contests t
 
 I also like how this contest is not team based. Working on this project I was able to do a lot of high-level thinking, write out features as detailed prompts, and then delegate the code writing to LLMs as if I was giving tasks to teammates.
 
-NVIDIA’s contests are “global developer contests”, but the contests are not open to developers in India and China. This is probably due to local rules and regulations governing how contests, prizes and taxes work. It is too bad; I would love to see what types of applications would come from participants in these countries.
+NVIDIA’s contests are “global developer contests”, but the contests so far are not open to developers in India and China. This is probably due to local rules and regulations governing how contests, prizes and taxes work. It is too bad; I would love to see what types of applications would come from participants in these countries. Also, there are also a lot of really interesting developments happening in the LLM space in both China and India!
 
-https://smarthistory.org/wat-phra-kaew-temple-of-the-emerald-buddha/
+The LLMs I used in this project were developed by some of the Chinese AI companies, and they are competitive with LLMs from Western countries on LLM benchmarks despite having access to fewer GPU resources. [Kaifu Lee mentioned in a Bloomberg interview](https://www.youtube.com/watch?v=UitJxc9LE60) that the scarcity of GPU resources in China will force Chinese engineers to innvovate in new ways to gain an advantage. One example of this we saw recently was when Chinese hardware hackers doubled the usable memory of the RTX 4090D (a variant of the RTX 4090 card with lower processing power to comply with US export regulations for China - the D stands for Dragon, apparently!).
+
+![RTX 4090D 48GB](/static/redlm/RTX4090D.jpg)
+
+Also, the team behind NVIDIA's TensorRT-LLM seems to be mostly Chinese NVIDIA employees in Beijing (from my observations of GitHub contributor profiles). This might be why the TensorRT-LLM LLM API has such good support for Chinese language models! I recommend the [Dwarkesh Patel podcast episode with @Asianometry and Dylan Patel of Semianalysis](https://www.youtube.com/watch?v=pE3KKUKXcTM) for interesting look at China's role in the semiconductor industry.
+
+NVIDIA recently concluded it's AI Summit in Mumbai. I was intruiged by the fact that Hindi has unique challenges that have have limited the development of Hindi LLMs compared to the development of English and Chinese LLMs. In a converstation with Jensen Huang, Indian industrial titan and CEO of Reliance Industries Mukesh Ambani spoke about his aspirations and ambition for India to overcome these challenges and develop a Hindi LLM. In a viral moment Mukesh Ambani shared that through devotion to attaining knowledge through the Hindu godess of knowledge Swathi, India will be met by the Godess of prosperity, Lakshmi. Just a few days later [NVIDIA Unveils Nemotron-4-Mini-Hindi-4B: AI for India's 500 Million Hindi Speakers](https://indiaai.gov.in/article/nvidia-unveils-nemotron-4-mini-hindi-4b-ai-for-india-s-500-million-hindi-speakers).
+
+![Mukesh Ambani](/static/redlm/mukesh_ambani.png)
+
+Hindi LLMs could enable applications to explore important works of literature from India. A comparable work of literature in size and cultural significance might be the Ramayana.
+
+The Ramayana is an ancient Indian epic that tells the story of Prince Rama's heroic quest to rescue his wife, Sita, who has been kidnapped by the demon king Ravana. Set in a world of gods, demons, and celestial beings, the story explores themes of duty, loyalty, and the triumph of good over evil. Guided by wisdom, strength, and the support of devoted allies like Hanuman, the monkey god, and his brother Lakshmana, Rama's journey is a deeply spiritual tale, celebrated for its poetic beauty and moral depth. The Ramayana continues to inspire and captivate audiences across cultures.
+
+The Ramayana story journeyed to Thailand centuries ago, transforming into the Ramakien, a Thai adaptation that retains the essence of the original Indian epic while adding distinctive Thai cultural elements. Introduced through trade, diplomacy, and cultural exchange between India and Southeast Asia, the story became deeply woven into Thailand’s art, literature, and performance traditions. Thai kings, particularly King Rama I, adapted and documented the Ramakien, giving it a prominent place in Thai history. Lavishly detailed murals surrounding the Temple of the Emerald Buddha in Bangkok’s Grand Palace depict the Ramakien in over 178 panels that totaling over 2 kilometers in length. On a recent visit to the Grand Palace, I imagined having an application that could link the detailed murals to elements of the story.
+
+![Ramakien murals surrounding Temple of the Emerald Buddha](/static/redlm/ramakien.png)
+
+The Dream of the Red Chamber, originally titled The Story of the Stone, is one of China’s greatest literary works and a masterpiece of world literature. The novel begins with a frame story centered on a magical stone, left over from the Chinese creation myth where the goddess Nuwa mends the heavens. Longing to experience the human world, the sentient stone persuades a Buddhist monk and a Toaist priest to reincarnate it as a boy. This boy, Baoyu, is born into a wealthy and influential family—a character partly based on the author, Cao Xueqin, and his own aristocratic upbringing. Through Baoyu's life, friendships, and romantic relationships, the novel delves into his family’s gradual decline, mirroring the instability of China’s own noble families in the late Qing dynasty. The story also portrays the era's customs, social structures, and beliefs, offering readers a richly detailed exploration of life in Qing China.
+
+It was a lot of fun to work on this project with tools from LlamaIndex and NVIDIA. With AI technology, GPUs are now essentially sentient stones, and I was able to share this important touchstone of the human experience with my computers using LlamaIndex and open source language models. In turn, RedLM shared with me delightful insights into world of Dream of the Red Chamber.
+
+![Story of a Stone](/static/redlm/stone_story.png)
