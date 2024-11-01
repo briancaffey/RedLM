@@ -51,19 +51,19 @@ You can listen to this podcast episode here:
 
 RedLM consists of two parts: a web UI built with Vue 3 using the Nuxt Framework and a backend API built with Python, FastAPI and LlamaIndex. There are lots of great tools for building full-stack AI applications such as Gradio and Streamlit, but I wanted to build with the web tools that I’m most familiar with and that provide the most flexibility. These frameworks (Nuxt and FastAPI) are simple and effective and they allowed me to develop quickly. Most of the code for this project was written by AI. I used OpenAI’s ChatGPT 4o, Anthropic’s Claude 3.5 Sonnet and 01.AI’s Yi-1.5-9B-Chat model. In my development process with AI, I prompted for one logical piece of the application at a time, such as one API route, one Vue component, one pinia store or one utility function, for example.
 
-This project embraces a hybrid AI inference model, meaning that the AI inference can be done either on local RTX PCs or using NVIDIA’s Cloud APIs from `build.nvidia.com` depending on configuration via environment variables. I used PCs with NVIDIA GeForce RTX 4090 GPUs to do inference with language and vision models, and with a change of configuration, I was able to do similar inference using NVIDIA’s API endpoints.
+This project embraces a hybrid AI inference model, meaning that the AI inference can be done either on local RTX PCs or using NVIDIA’s Cloud APIs from `build.nvidia.com` depending on configuration via environment variables. I used PCs with NVIDIA GeForce RTX 4090 GPUs to do inference with language and vision models, and with a change of configuration, I was able to do similar inference using NVIDIA’s API endpoints. This allowed me to develop the project both on powerful RTX desktop workstations and Mac laptops.
 
 ## Translating Dream of the Red Chamber with TensorRT-LLM
 
-Translation is often mentioned as one of the capabilities of bilingual LLMs from China. I wanted to try translating this book from Chinese to English, but I also wanted to better understand the meaning of the original text written in vernacular Chinese. Written vernacular Chinese is essentially a form of Chinese that closely resembles spoken Chinese. The use of Baihua in literary works marked a significant cultural shift that started to make literature and eduction more accessible. Before the emrgence of written vernacular Chinese, Chinese literature was dominated by Classical Chinese (Wenyanwen) which is a more consice, ambiguous and specialized for of languages that assumes an understanding of ancient texts and Confucian classics.
+Translation is often mentioned as one of the capabilities of bilingual LLMs from China. I wanted to try translating this book from Chinese to English, but I also wanted to better understand the meaning of the original text written in vernacular Chinese. Written vernacular Chinese is essentially a form of Chinese that closely resembles the way Chinese was spoken in imperial China by common people. The use of Baihua in literary works marked a significant cultural shift that started to make literature and eduction more accessible. Before the emrgence of written vernacular Chinese, Chinese literature was dominated by Classical Chinese (Wenyanwen) which is a more consice, ambiguous and specialized for of languages that assumes an understanding of ancient texts and Confucian classics. The difference between vernacular Chinese and modern Mandarin Chinese is somewhat analogous to the different between Shakespearian English (Early Modern English) and Modern English.
 
-Chinese large language models are well versed in Classical Chinese, written Chinese vernacular and modern Mandarin Chinese. I decided to try rewrite the original text in simple, modern Mandarin Chinese and then using this new modern Mandarin version, translate the story into English.
+Chinese large language models are well versed in Classical Chinese, written Chinese vernacular and modern Mandarin Chinese. I decided to rewrite the original vernacular text in simple, modern Mandarin Chinese and then using this new modern Mandarin version, translate the story into English.
 
 Dream of the Red Chamber is a large book. It is composed of over 800,000 Chinese characters, using 4303 unique Chinese characters. It has 120 chapters and a total of 3996 paragraphs. Here is a histogram showing the number of characters per paragraph.
 
 ![Paragraph lengths](/static/redlm/paragraphs.png)
 
-I rented a large multi-GPU instance from AWS using some of the credits I get as a member of the AWS Community Builders program. The g5.12xlarge instance I selected has 4 A10G Tensor Core GPUs. The TensorRT-LLM LLM API is a relatively new part of the TensorRT-LLM library. It provides a very simple, high-level interface for doing inference. Following the [LLM Generate Distributed example](https://nvidia.github.io/TensorRT-LLM/llm-api-examples/llm_generate_distributed.html) from the TensorRT-LLM documentation, I was able to translate the entire book into simple Mandarin and then from Mandarin into English in about an hour and 15 minutes.
+I rented a large multi-GPU instance from AWS using some of the credits I get as a member of the AWS Community Builders program. The g5.12xlarge instance I selected has 4 A10G Tensor Core GPUs. The TensorRT-LLM LLM API is a relatively new part of the TensorRT-LLM library. It provides a very simple, high-level interface for doing inference. Following the [LLM Generate Distributed example](https://nvidia.github.io/TensorRT-LLM/llm-api-examples/llm_generate_distributed.html) from the TensorRT-LLM documentation, I was able to translate the entire book into simple Mandarin and then from Mandarin into English in about an hour and 15 minutes. The `tensor_parallel_size` option in the LLM API allows for distributed inference, this meant that up to 4 paragraphs could be translated at the same time on different GPUs on the same EC2 instance.
 
 ```
 Translating: data/book/22.json
@@ -114,11 +114,11 @@ I found that ChatGPT 4o could handle any Chinese translation task flawlessly, bu
 
 ## Building Q&A bots with RAG using LlamaIndex
 
-My primary object with this project was to implement a simple chat feature that responds to questions about the book with relevant responses including the references to the specific paragraphs used in the response. The following shows images of the UI I built with one of the examples I included in the video I made for this project.
+My primary objective with this project was to implement a simple chat feature that responds to questions about the book with relevant responses including the references to the specific paragraphs used in the response. The following shows images of the UI I built with one of the examples I included in the video I made for this project.
 
 ![RAG Example](/static/redlm/rag_example.png)
 
-The question in the screenshots above is: “What does Jia Baoyu’s father think about him?” The response includes references to paragraphs where Jia Zheng (Baoyu’s father) is discussing his son. I was pretty amazed that the RAG query was able to pull out these two paragraphs. I haven’t read very much of this book at all, but the retrieved documents seemed to be directly related to my query.
+I haven't read that much of the book before working on this project, but I have read a lot *about* this book's characters, major themes and plot. This Q&A bot was a very interesting entrypoint to explore specific passages of the book starting with questions coming from my knowledge about the book. The question in the screenshots above is: “What does Jia Baoyu’s father think about him?” The response includes references to paragraphs where Jia Zheng (Baoyu’s father) is discussing his son. I was pretty amazed that the RAG query was able to pull out these two paragraphs.
 
 *In Dream of the Red Chamber, the relationship between protagonist Jia Baoyu and his father, Jia Zheng, is complex and fraught with tension. Jia Zheng, a strict, traditional Confucian patriarch, embodies values of discipline, scholarly rigor, and duty. He expects his son to excel in his studies and uphold the family’s honor by pursuing an official career in government. Baoyu, however, is sensitive, imaginative, and inclined toward poetry and the company of women, especially his cousins Lin Daiyu and Xue Baochai. This preference clashes with Jia Zheng’s expectations, leading to frequent misunderstandings and disappointment.*
 
@@ -180,9 +180,12 @@ class QAndAQueryEngine(CustomQueryEngine):
 
 ### Indexing the book data
 
-In the indexing process, embedding models are used to translate chunks of text (paragraphs) into high-dimensional vectors that represent not only the tokens, but the relationships between the tokens. These are the vectors stored in the "Vector Database" used by LlamaIndex. The chapter number, paragraph number and version (original, Mandarin Chinese and English) of each paragraph are added to the database entry as metadata during the indexing step which runs via a script before starting the FastAPI server. Here's how I indexed the original text and translations with LlamaIndex:
+In the indexing process, embedding models are used to translate chunks of text (paragraphs) into high-dimensional vectors that represent the relationships between the tokens in a chunk of text. These are the vectors stored in the "Vector Database" used by LlamaIndex. The chapter number, paragraph number and version (original, Mandarin Chinese and English) of each paragraph are added to the database entry as metadata during the indexing step which runs via a script before starting the FastAPI server. Here's how I indexed the original text and translations with LlamaIndex:
 
 ```python
+from llama_index.core import Document, VectorStoreIndex
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+
 en_embedding_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")
 zh_embedding_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-zh-v1.5")
 
@@ -224,7 +227,13 @@ For the embedding models, I used the small BAAI General Embedding models (BGE) f
 
 I did most of the development for this project using the in-memory VectorIndexStore provided by LlamaIndex. This worked well, but making any changes to the FastAPI server required the data to be reloaded into memory which took several seconds each time. This can really hinder a good development flow, so I looked into using an external service for the vector database instead of running it in memory.
 
-Using the Milvus docker compose example I was able to set up an external vector database based on etcd and minio. Milvus also provides a Helm chart for running their vector database, this would be helpful if I was going to be running everything in Kubernetes (inference, vector database and application containers).
+![Vector Database Options](/static/redlm/vectordbs.png)
+
+There are a LOT of options to consider when picking a vector database for a RAG application. Milvus has a highly decoupled architecture, it is fully open source and I had seen it in some examples, so I decided to give it a try.
+
+![Milvus Vector Database Architecture](/static/redlm/milvus.png)
+
+Using the [Milvus docker compose example](https://milvus.io/docs/v2.0.x/install_standalone-docker.md) I was able to set up an external vector database based on etcd and minio. Milvus also provides a Helm chart for running their vector database, this would be helpful if I was going to be running everything in Kubernetes (inference, vector database and application containers).
 
 ### Other examples of RAG with English questions
 
@@ -246,6 +255,9 @@ Then I would select the version of the prompt to use in the QueryEngine, either 
 
 ![Multi-modal Q&A example 1](/static/redlm/qa_example_01.png)
 
+![RAG Flower Pedal Example](/static/redlm/qa_example_flower_pedals.png)
+![RAG Flower Pedal Example with Reference](/static/redlm/qa_example_flower_pedals_a.png)
+
 ## RedLM RAG Evaluation
 
 Examinations have long been a cornerstone of Chinese society, shaping individual aspirations, cultural values, and even government structures. This legacy began with the imperial civil service exams (keju), established during the Sui and Tang dynasties, and carries through in Modern Chinese with the gaokao college entrance examination, both of which allowing for unprecedented meritocratic route to power and prestige. Given how widely studied in China, I was not surprised to find a wealth of examination questions written for students studying Dream of the Red Chamber.
@@ -261,7 +273,7 @@ Multiple choice questions from a Dream of the Red Chamber test (examcoo.com)
 
 To run the evaluation I set up two scripts. The first script would prompt the LLM to answer the question without any additional information from the RAG system. This served as a baseline to see how well the LLM could do at answering multiple choice questions about the book. The script simply checks to see if the LLM response contains the letter (A, B, C or D) of the correct answer and keeps track of the number of questions answered correctly.
 
-Another script was used to take the test using large language models with RAG. In this script, the prompt sent to the LLM included relevant paragraphs from the book.
+Another script was used to take the test using large language models with RAG. In this script, the prompt sent to the LLM included relevant paragraphs from the book based on how similar the query is to each paragraph in the book based on the cosine similarity metric mentioned earlier.
 
 ![RAG evaluation](/static/redlm/rag_eval.png)
 
@@ -269,7 +281,7 @@ Here are some results and other observations from this experiment:
 
 - LLMs alone scored in the mid 30% range (36%)
 - LLMs using retrieval augmented generation with the set of questions score in the mid 40% range (44%)
-- I used a the completion API rather than the chat API and set the `max_tokens` to 16. This was done to ensure that the LLM only gave a short response with a valid answer choice rather than giving a long response with an explanation.
+- I used the completion API rather than the chat API and set the `max_tokens` to 16. This was done to ensure that the LLM only gave a short response with a valid answer choice rather than giving a long response with an explanation.
 - The evaluation took longer for LLM + RAG test because of the time required for making the RAG query and the longer prompt (including both the original multiple-choice question and the referenced paragraphs).
 - I used the `01-ai/Yi-1.5-9B-Chat` model for this test, but I probably should have used the base model rather than the chat model.
 - Some questions would not be capable of being answered by RAG. For example, some of the questions are about film renditions of the novel. Most of the questions seemed relevant to the content of the book, so I didn’t bother to filter out the questions that were not directly related to the book’s content.
@@ -313,6 +325,8 @@ The correct answer for this question is C.
 Qwen2-VL was released a few days before I heard about this contest. Qwen is the name of Alibaba’s AI Lab, and it is an abbreviation of the Chinese characters: 千问 (”qian wen”, meaning 1000 questions). VL stands for vision-language, meaning that the model is capable of understanding both text and images. I had tested out the previous version of Qwen’s vision-language model and was very impressed by how it could answer questions about images.
 
 Sun Wen was a Qing-era painter who spent 36 years of his life creating a series of 230 paintings detailing scenes from Dream of the Red Chamber. These images are incredibly detailed and often contain multiple disjointed scenes in one painting. If you asked a Qwen-VL model to describe one of the images, you might get back a lengthy description, and the context window might easily be exceeded when including a resolution high enough for the model to properly “see” anything.
+
+![Dream of the Red Chamber Painting 131](/static/redlm/painting_131.png)
 
 This gave me the idea to build a feature where a user can select part of a painting (by clicking and dragging on an image) and ask a question about that section of the painting alone. I knew that this could be done with something like HTML canvas, and I also knew that doing this on my own would take a very long time to write since I am at best a very casual frontend developer. It took me just a few minutes to write out the prompt and Claude 3.5 Sonnet wrote a perfect prototype in less than a minute. Here’s the prompt I used:
 
@@ -499,7 +513,7 @@ Three renditions of Journey West: Songokū (The Monkey King) polychrome woodbloc
 
 I created the video for this project using Blender. Blender is my favorite tool for 3D and its sequencer editor is a great non-linear video editing tool for simple projects. I used the following formula to create the video:
 
-1. Background music: I used the AI music generation service called Suno with the prompt “mystical strange traditional Chinese music from the Qing Dynasty”. Here’s the link to my Suno playlist called “Qing Dynasty Music” where you can find the original song and some other good songs that I generated using this prompt. [TODO: Add Suno playlist link]
+1. Background music: I used the AI music generation service called Suno with the prompt “mystical strange traditional Chinese music from the Qing Dynasty”. Here’s the link to my Suno playlist called “Qing Dynasty Music” where you can find the original song and some other good songs that I generated using this prompt. [Qing Dynasty Music Playlist on Suno](https://suno.com/playlist/863ea0dd-1921-467c-8b69-16dbd126d966)
 2. Outline: For this project, the main sections are the introduction, then explaining each part with a short demo: translation, text-based Q&A, evaluation for text-based Q&A, image-based Q&A, and finally a short outro. I wrote an outline and then ChatGPT helped with filling out the content.
 3. Narration: I used ElevenLabs to narrate the main part of the video using a clone of my voice using the ElevenLabs Voice Lab. The Chinese voices were generated on my computer with an open-source text-to-speech model called ChatTTS.
 4. Images and videos: I gathered images and screen captures of different parts of the project including code snippets, paintings of the book, flow diagrams and screen recordings of the application.
@@ -523,3 +537,5 @@ I’m glad to have had the opportunity to join three NVIDIA developer contests t
 I also like how this contest is not team based. Working on this project I was able to do a lot of high-level thinking, write out features as detailed prompts, and then delegate the code writing to LLMs as if I was giving tasks to teammates.
 
 NVIDIA’s contests are “global developer contests”, but the contests are not open to developers in India and China. This is probably due to local rules and regulations governing how contests, prizes and taxes work. It is too bad; I would love to see what types of applications would come from participants in these countries.
+
+https://smarthistory.org/wat-phra-kaew-temple-of-the-emerald-buddha/
