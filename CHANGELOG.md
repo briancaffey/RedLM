@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.9.0](https://github.com/briancaffey/RedLM/compare/v0.8.0...v0.9.0) (2024-11-04)
+
+
+### Features
+
+* **article:** add section about models used in RedLM ([bff2f70](https://github.com/briancaffey/RedLM/commit/bff2f70132e408a124f6e01d466286cc689af589))
+* **article:** draft of final thoughts ([fa9d13f](https://github.com/briancaffey/RedLM/commit/fa9d13f5018f6320162b0fae741513374a9685a0))
+* **article:** update article with more examples ([b92215e](https://github.com/briancaffey/RedLM/commit/b92215e34a331051ce6a7a92447b9aee6fd16c60))
+* **article:** update article with more examples and images ([ef96491](https://github.com/briancaffey/RedLM/commit/ef964912ace038cef330a9669e4dfe021d423024))
+* **index:** use both english and chinese embed models during indexing ([25c4135](https://github.com/briancaffey/RedLM/commit/25c413589888c5405a72be1dd566c1ce76ff3499))
+* **index:** use both english and chinese embed models during indexing ([cab16ec](https://github.com/briancaffey/RedLM/commit/cab16ec0ec94329b577ae90e6630fd82d3bc619a))
+* **language:** support for Q&A queries in English and Chinese with dynamic prompts, update article, add examples ([780b5a7](https://github.com/briancaffey/RedLM/commit/780b5a7dcd102450e6844fa2937d161dc015d9fe))
+* **milvus:** add support for using external milvus server with docker compose via env var configuration ([872a2b0](https://github.com/briancaffey/RedLM/commit/872a2b040ddb04ba0d805710cbe084d437397348))
+
+
+### Bug Fixes
+
+* **typo:** fix all typos in article using spellcheck extension cSpell ([3f151c0](https://github.com/briancaffey/RedLM/commit/3f151c0367436676d2a25d67d77d17ef3a2e8261))
+* **ui:** fix issue with cn function from shadcn and radix ([ce11c5d](https://github.com/briancaffey/RedLM/commit/ce11c5d523133343bfba09b811b50e7dc8e2e570))
+
 ## [0.8.0](https://github.com/briancaffey/RedLM/compare/v0.7.0...v0.8.0) (2024-10-22)
 
 
