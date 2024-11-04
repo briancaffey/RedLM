@@ -41,7 +41,7 @@ In this project I focused on three applications of language models:
 
 ## NotebookLM
 
-I took this article and fed it to NotebookLM to create a short "Deep Dive" podcast episode that describes the project:
+I used this article to create a "Deep Dive" podcast episode for RedLM using Google's NotebookLM.
 
 ![NotebookLM](/static/redlm/notebooklm.png)
 
@@ -49,13 +49,15 @@ You can listen to this podcast episode here:
 
 ## How I built RedLM
 
-RedLM consists of two parts: a web UI built with Vue 3 using the Nuxt Framework and a backend API built with Python, FastAPI and LlamaIndex. There are lots of great tools for building full-stack AI applications such as Gradio and Streamlit, but I wanted to build with the web tools that I’m most familiar with and that provide the most flexibility. These frameworks (Nuxt and FastAPI) are simple and effective and they allowed me to develop quickly. Most of the code for this project was written by AI. I used OpenAI’s ChatGPT 4o, Anthropic’s Claude 3.5 Sonnet and 01.AI’s Yi-1.5-9B-Chat model. In my development process with AI, I prompted for one logical piece of the application at a time, such as one API route, one Vue component, one pinia store or one utility function, for example.
+RedLM consists of two parts: a web UI built with Vue 3 using the Nuxt Framework and a backend API built with Python, FastAPI and LlamaIndex. There are lots of great tools for building full-stack AI applications such as Gradio and Streamlit, but I wanted to build with the web tools that I’m most familiar with and that provide the most flexibility. These frameworks (Nuxt and FastAPI) are simple and effective and they allowed me to develop quickly.
+
+Most of the code for this project was written by AI. I used OpenAI’s ChatGPT 4o, Anthropic’s Claude 3.5 Sonnet and 01.AI’s Yi-1.5-9B-Chat model. In my development process with AI, I prompted for one logical piece of the application at a time, such as one API route, one Vue component, one pinia store or one utility function, for example. In this article I'll share some of the prompts I used in my development workflow.
 
 This project embraces a hybrid AI inference model, meaning that the AI inference can be done either on local RTX PCs or using NVIDIA’s Cloud APIs from `build.nvidia.com` depending on configuration via environment variables. I used PCs with NVIDIA GeForce RTX 4090 GPUs to do inference with language and vision models, and with a change of configuration, I was able to do similar inference using NVIDIA’s API endpoints. This allowed me to develop the project both on powerful RTX desktop workstations and Mac laptops.
 
 ## Translating Dream of the Red Chamber with TensorRT-LLM
 
-Translation is often mentioned as one of the capabilities of bilingual LLMs from China. I wanted to try translating this book from Chinese to English, but I also wanted to better understand the meaning of the original text written in vernacular Chinese. Written vernacular Chinese is essentially a form of Chinese that closely resembles the way Chinese was spoken in imperial China by common people. The use of Baihua in literary works marked a significant cultural shift that started to make literature and eduction more accessible. Before the emrgence of written vernacular Chinese, Chinese literature was dominated by Classical Chinese (Wenyanwen) which is a more consice, ambiguous and specialized for of languages that assumes an understanding of ancient texts and Confucian classics. The difference between vernacular Chinese and modern Mandarin Chinese is somewhat analogous to the different between Shakespearian English (Early Modern English) and Modern English.
+Translation is often mentioned as one of the capabilities of bilingual LLMs from China. I wanted to try translating this book from Chinese to English, but I also wanted to better understand the meaning of the original text written in vernacular Chinese. Written vernacular Chinese is essentially a form of Chinese that closely resembles the way Chinese was spoken in imperial China by common people. The use of vernacular Chinese (Baihua) in literary works marked a significant cultural shift that started to make literature and education more accessible. Before the emergence of written vernacular Chinese, Chinese literature was dominated by Classical Chinese (Wenyanwen) which is a more concise, ambiguous and specialized for of languages that assumes an understanding of ancient texts and Confucian classics. The difference between vernacular Chinese and modern Mandarin Chinese is somewhat analogous to the different between Shakespearian English (Early Modern English) and Modern English.
 
 ![Baihua, Mandarin and English](/static/redlm/translations.png)
 
@@ -116,7 +118,7 @@ I found that ChatGPT 4o could handle any Chinese translation task flawlessly, bu
 
 ## Building Q&A bots with RAG using LlamaIndex
 
-My primary objective with this project was to implement a simple chat feature that responds to questions about the book with relevant responses including the references to the specific paragraphs used in the response. The following shows images of the UI I built with one of the examples I included in the video I made for this project.
+My primary objective with this project was to implement a simple chat bot that responds to questions about the book with references to the specific paragraphs used in the response. The following shows images of the UI I built with one of the examples I included in the video I made for this project.
 
 ![RAG Example](/static/redlm/rag_example.png)
 
@@ -124,7 +126,7 @@ I haven't read that much of the book before working on this project, but I have 
 
 *In Dream of the Red Chamber, the relationship between protagonist Jia Baoyu and his father, Jia Zheng, is complex and fraught with tension. Jia Zheng, a strict, traditional Confucian patriarch, embodies values of discipline, scholarly rigor, and duty. He expects his son to excel in his studies and uphold the family’s honor by pursuing an official career in government. Baoyu, however, is sensitive, imaginative, and inclined toward poetry and the company of women, especially his cousins Lin Daiyu and Xue Baochai. This preference clashes with Jia Zheng’s expectations, leading to frequent misunderstandings and disappointment.*
 
-By default, LlamaIndex uses cosine similarity as the distance metric for finding the vectors representing the documents (paragraphs) that are “closest” to the vector representing the user query. This is the central mechanism by which RAG works. LlamaIndex provides an abstraction of this process, hiding the implementation details and allowing rapid development of retreival systems.
+By default, LlamaIndex uses cosine similarity as the distance metric for finding the vectors representing the documents (paragraphs) that are “closest” to the vector representing the user query. This is the central mechanism by which RAG works. LlamaIndex provides an abstraction of this process, hiding the implementation details and allowing rapid development of retrieval systems.
 
 ![Cosine Similarity](/static/redlm/cosine_similarity.png)
 
@@ -137,7 +139,7 @@ Here is some of the code I wrote for the text-based Q&A bot using LlamaIndex’s
 q_and_a_prompt = PromptTemplate(
     "这是相关的参考资料：\n" # Here is some related reference material:
     "---------------------\n"
-    "{context_str}\n" # The retreived paragraph text will be inserted here
+    "{context_str}\n" # The retrieved paragraph text will be inserted here
     "---------------------\n"
     "根据上述的参考资料，回答下面的问题\n" # Based on the above reference material, answer the following question:
     "问题：{query_str}\n" # Question: (the user question from the text box in the UI is added here)
@@ -223,7 +225,7 @@ if __name__ == "__main__":
     persist_index()
 ```
 
-For the embedding models, I used the small BAAI General Embedding models (BGE) for English and Chinese. BAAI is the Beijing Academy of Artificial Intelligence, and I leared about this organization through some of the examples on the LlamaIndex site that use BAAI embeddings. There are multi-lingual embedding models (e.g. `BAAI/bge-m3`), but setting the embedding model on a per-document basis is possible and in some cases it might be preferrable to using a single embedding model for all documents.
+For the embedding models, I used the small BAAI General Embedding models (BGE) for English and Chinese. BAAI is the Beijing Academy of Artificial Intelligence, and I learned about this organization through some of the examples on the LlamaIndex site that use BAAI embeddings. There are multi-lingual embedding models (e.g. `BAAI/bge-m3`), but setting the embedding model on a per-document basis is possible and in some cases it might be preferable to using a single embedding model for all documents.
 
 ### Milvus Vector Database
 
@@ -264,7 +266,7 @@ Then I would select the version of the prompt to use in the QueryEngine, either 
 
 Examinations have long been a cornerstone of Chinese society, shaping individual aspirations, cultural values, and even government structures. This legacy began with the imperial civil service exams (keju), established during the Sui and Tang dynasties, and carries through in Modern Chinese with the gaokao college entrance examination, both of which allowing for unprecedented meritocratic route to power and prestige. Given how widely studied in China, I was not surprised to find a wealth of examination questions written for students studying Dream of the Red Chamber.
 
-I used [a set of 1000 multiple choice questions about Dream of the Red Chamber on examcoo.com](https://www.examcoo.com/editor/do/view/id/246401) to evaluate the effectiveness of the RAG system I had built with LlamaIndeex. I wrote a script to parse the questions from the website HTML using ChatGPT (parsing HTML is one of my favorite use cases of LLMs!) I filtered out questions based on the following criteria:
+I used [a set of 1000 multiple choice questions about Dream of the Red Chamber on examcoo.com](https://www.examcoo.com/editor/do/view/id/246401) to evaluate the effectiveness of the RAG system I had built with LlamaIndex. I wrote a script to parse the questions from the website HTML using ChatGPT (parsing HTML is one of my favorite use cases of LLMs!) I filtered out questions based on the following criteria:
 
 - Four answer choices - some of the questions had more than four answer choices. I filtered questions with more than four answer choices to keep the evaluation simple. This would allow me to assume that random answer choices would have a 25% chance of being correct.
 - Only one answer - some questions had more than one answer. This would also help keep the evaluation logic simple.
@@ -363,7 +365,7 @@ This flow chart shows how the image Q&A feature works.
 Here is the prompt I used for the image Q&A feature:
 
 ```python
-# multi-modla Q&A prompt
+# multi-modal Q&A prompt
 mm_q_and_a_prompt = PromptTemplate(
 		# "here is relevant content from the book"
     "这是书中相关的内容：\n"
@@ -427,6 +429,8 @@ The response to the following query did a good job of combining information gath
 
 ![Q&A Example with Carriage](/static/redlm/qa_example_carriage.png)
 
+![Ou Guan Example](/static/redlm/qa_example_ou_guan.png)
+
 ## LlamaIndex Developer Experience
 
 Overall, I found the LlamaIndex documentation to be very helpful. Before using LlamaIndex for this project I had used LangChain to build a RAG POC, but I didn’t get very good results. I love how the LlamaIndex documentation has a 5-line starter example for building a RAG system:
@@ -485,7 +489,7 @@ I had a lot of driver issues when trying to get kubernetes to run the vLLM conta
 
 > RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 804: forward compatibility was attempted on non supported HW
 
-I tried uninstalling and reinstalling different versions of the NVIDIA drivers and CUDA but kept seeing the same message once the server would try to start up in the vLLM container logs. Rebooting my PC didn't work either. I saw a recommendation to turn off securet boot in BIOS. I didn't turn it on, but having nothing else to try I went into the BIOS settings and found that there were some keys configured in the secure boot section. After I deleted these keys and reboot, everything seemed to work normally. I'm not sure why my PC was in secure boot mode, though!
+I tried uninstalling and reinstalling different versions of the NVIDIA drivers and CUDA but kept seeing the same message once the server would try to start up in the vLLM container logs. Rebooting my PC didn't work either. I saw a recommendation to turn off secure boot in BIOS. I didn't turn it on, but having nothing else to try I went into the BIOS settings and found that there were some keys configured in the secure boot section. After I deleted these keys and reboot, everything seemed to work normally. I'm not sure why my PC was in secure boot mode, though!
 
 ## Remote Local Development
 
@@ -540,13 +544,13 @@ I also like how this contest is not team based. Working on this project I was ab
 
 NVIDIA’s contests are “global developer contests”, but the contests so far are not open to developers in India and China. This is probably due to local rules and regulations governing how contests, prizes and taxes work. It is too bad; I would love to see what types of applications would come from participants in these countries. Also, there are also a lot of really interesting developments happening in the LLM space in both China and India!
 
-The LLMs I used in this project were developed by some of the Chinese AI companies, and they are competitive with LLMs from Western countries on LLM benchmarks despite having access to fewer GPU resources. [Kaifu Lee mentioned in a Bloomberg interview](https://www.youtube.com/watch?v=UitJxc9LE60) that the scarcity of GPU resources in China will force Chinese engineers to innvovate in new ways to gain an advantage. One example of this we saw recently was when Chinese hardware hackers doubled the usable memory of the RTX 4090D (a variant of the RTX 4090 card with lower processing power to comply with US export regulations for China - the D stands for Dragon, apparently!).
+The LLMs I used in this project were developed by some of the Chinese AI companies, and they are competitive with LLMs from Western countries on LLM benchmarks despite having access to fewer GPU resources. [Kaifu Lee mentioned in a Bloomberg interview](https://www.youtube.com/watch?v=UitJxc9LE60) that the scarcity of GPU resources in China will force Chinese engineers to innovate in new ways to gain an advantage. One example of this we saw recently was when Chinese hardware hackers doubled the usable memory of the RTX 4090D (a variant of the RTX 4090 card with lower processing power to comply with US export regulations for China - the D stands for Dragon, apparently!).
 
 ![RTX 4090D 48GB](/static/redlm/RTX4090D.jpg)
 
 Also, the team behind NVIDIA's TensorRT-LLM seems to be mostly Chinese NVIDIA employees in Beijing (from my observations of GitHub contributor profiles). This might be why the TensorRT-LLM LLM API has such good support for Chinese language models! I recommend the [Dwarkesh Patel podcast episode with @Asianometry and Dylan Patel of Semianalysis](https://www.youtube.com/watch?v=pE3KKUKXcTM) for interesting look at China's role in the semiconductor industry.
 
-NVIDIA recently concluded it's AI Summit in Mumbai. I was intruiged by the fact that Hindi has unique challenges that have have limited the development of Hindi LLMs compared to the development of English and Chinese LLMs. In a converstation with Jensen Huang, Indian industrial titan and CEO of Reliance Industries Mukesh Ambani spoke about his aspirations and ambition for India to overcome these challenges and develop a Hindi LLM. In a viral moment Mukesh Ambani shared that through devotion to attaining knowledge through the Hindu godess of knowledge Swathi, India will be met by the Godess of prosperity, Lakshmi. Just a few days later [NVIDIA Unveils Nemotron-4-Mini-Hindi-4B: AI for India's 500 Million Hindi Speakers](https://indiaai.gov.in/article/nvidia-unveils-nemotron-4-mini-hindi-4b-ai-for-india-s-500-million-hindi-speakers).
+NVIDIA recently concluded it's AI Summit in Mumbai. I was intrigued by the fact that Hindi has unique challenges that have have limited the development of Hindi LLMs compared to the development of English and Chinese LLMs. In a conversation with Jensen Huang, Indian industrial titan and CEO of Reliance Industries Mukesh Ambani spoke about his aspirations and ambition for India to overcome these challenges and develop a Hindi LLM. In a viral moment Mukesh Ambani shared that through devotion to attaining knowledge through the Hindu Goddess of knowledge Sarawati, India will be met by the Goddess of prosperity, Lakshmi. Just a few days later [NVIDIA Unveils Nemotron-4-Mini-Hindi-4B: AI for India's 500 Million Hindi Speakers](https://indiaai.gov.in/article/nvidia-unveils-nemotron-4-mini-hindi-4b-ai-for-india-s-500-million-hindi-speakers).
 
 ![Mukesh Ambani](/static/redlm/mukesh_ambani.png)
 
@@ -558,7 +562,7 @@ The Ramayana story journeyed to Thailand centuries ago, transforming into the Ra
 
 ![Ramakien murals surrounding Temple of the Emerald Buddha](/static/redlm/ramakien.png)
 
-The Dream of the Red Chamber, originally titled The Story of the Stone, is one of China’s greatest literary works and a masterpiece of world literature. The novel begins with a frame story centered on a magical stone, left over from the Chinese creation myth where the goddess Nuwa mends the heavens. Longing to experience the human world, the sentient stone persuades a Buddhist monk and a Toaist priest to reincarnate it as a boy. This boy, Baoyu, is born into a wealthy and influential family—a character partly based on the author, Cao Xueqin, and his own aristocratic upbringing. Through Baoyu's life, friendships, and romantic relationships, the novel delves into his family’s gradual decline, mirroring the instability of China’s own noble families in the late Qing dynasty. The story also portrays the era's customs, social structures, and beliefs, offering readers a richly detailed exploration of life in Qing China.
+The Dream of the Red Chamber, originally titled The Story of the Stone, is one of China’s greatest literary works and a masterpiece of world literature. The novel begins with a frame story centered on a magical stone, left over from the Chinese creation myth where the goddess Nuwa mends the heavens. Longing to experience the human world, the sentient stone persuades a Buddhist monk and a Taoist priest to reincarnate it as a boy. This boy, Baoyu, is born into a wealthy and influential family—a character partly based on the author, Cao Xueqin, and his own aristocratic upbringing. Through Baoyu's life, friendships, and romantic relationships, the novel delves into his family’s gradual decline, mirroring the instability of China’s own noble families in the late Qing dynasty. The story also portrays the era's customs, social structures, and beliefs, offering readers a richly detailed exploration of life in Qing China.
 
 It was a lot of fun to work on this project with tools from LlamaIndex and NVIDIA. With AI technology, GPUs are now essentially sentient stones, and I was able to share this important touchstone of the human experience with my computers using LlamaIndex and open source language models. In turn, RedLM shared with me delightful insights into world of Dream of the Red Chamber.
 
