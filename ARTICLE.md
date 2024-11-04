@@ -47,6 +47,8 @@ I used this article to create a "Deep Dive" podcast episode for RedLM using Goog
 
 You can listen to this podcast episode here:
 
+![RedLM Deep Dive](/static/redlm/redlm_deep_dive.png)
+
 ## How I built RedLM
 
 RedLM consists of two parts: a web UI built with Vue 3 using the Nuxt Framework and a backend API built with Python, FastAPI and LlamaIndex. There are lots of great tools for building full-stack AI applications such as Gradio and Streamlit, but I wanted to build with the web tools that I’m most familiar with and that provide the most flexibility. These frameworks (Nuxt and FastAPI) are simple and effective and they allowed me to develop quickly.
@@ -490,6 +492,42 @@ I had a lot of driver issues when trying to get kubernetes to run the vLLM conta
 > RuntimeError: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 804: forward compatibility was attempted on non supported HW
 
 I tried uninstalling and reinstalling different versions of the NVIDIA drivers and CUDA but kept seeing the same message once the server would try to start up in the vLLM container logs. Rebooting my PC didn't work either. I saw a recommendation to turn off secure boot in BIOS. I didn't turn it on, but having nothing else to try I went into the BIOS settings and found that there were some keys configured in the secure boot section. After I deleted these keys and reboot, everything seemed to work normally. I'm not sure why my PC was in secure boot mode, though!
+
+## AI Models used in this project
+
+I selected LLMs that run efficiently on RTX PCs, are available in the NVIDIA API catalog, and offer strong bilingual support in Chinese and English, ensuring compatibility, performance, and linguistic flexibility. Here are the models that I ended up using with RedLM:
+
+### `01-ai/Yi-1.5-9B-Chat` and `01-ai/Yi-Large`
+
+I used `01-ai/Yi-1.5-9B-Chat` for most of the LLM inference while developing RedLM on my RTX PCs. [This model family](https://github.com/01-ai/Yi) performs well on both Chinese and English benchmarks, and has a variety of model sizes. I was able to try using the `01-ai/yi-large` model from the NVIDIA API catalog when using remote cloud inference. I used the `vllm/vllm-openai:latest` container to run this locally.
+
+There are also vision models in the Yi series, such as [01-ai/Yi-VL-34B](https://huggingface.co/01-ai/Yi-VL-34B), but I didn't use these models in my project.
+
+### `baichuan-inc/baichuan2-13b-chat`
+
+This model is available in the NVIDIA API catalog, and it was the main model I used when testing remote inference. It performs well in a variety of tasks and scores highly on the the Chinese Massive Multitask Language Understanding (CMMLU) benchmark.
+
+### `Qwen/Qwen2-7B`
+
+This model was used for summary and translation of the source text. It was supported by the TensorRT-LLM LLM API and I didn't have any issues building the TensorRT-LLM model with it on the EC2 instance used to do the completion inference for translations.
+
+### `Qwen/Qwen2-VL-2B-Instruct`
+
+This was the vision language model (VLM) that I used locally when developing on RTX. I was impressed at how well it could describe images given the small parameter count of the model (2 billion parameters). The small size of this model made it easy to run in my RTX PC cluster.
+
+There is [an open GitHub issue for TensorRT-LLM support for Qwen2-VL](https://github.com/NVIDIA/TensorRT-LLM/issues/2183) at the time of writing.
+
+I wrote a simple FastAPI server using the Hugging Face `transformers` library based on example code from this model's documentation (see `services/qwen2-vl` in the RedLM GitHub repo for more details). I packaged this service into a container in order to run it in my local kubernetes cluster along with other inference services.
+
+### `meta/llama-3.2-90b-vision-instruct`
+
+This model came out while I was working on the project, and I decided to use it instead of the `adept/fuyu-8b` model that was previously one of the only vision language models in the NVIDIA API catalog. The `meta/llama-3.2-90b-vision-instruct` model has strong Chinese language skills, so it was a good model to use when doing remote inference for the image Q&A bot.
+
+### [`nvidia/NVLM-D-72B`](https://huggingface.co/nvidia/NVLM-D-72B)
+
+I didn't use this model in my project, but it came out recently and looks awesome! Hopefully this model will be available on the NVIDIA API catalog soon. It is trained on the `Qwen2-72B-Instruct` text-only model, so it likely also has very strong support for Chinese language.
+
+> Today (September 17th, 2024), we introduce NVLM 1.0, a family of frontier-class multimodal large language models (LLMs) that achieve state-of-the-art results on vision-language tasks, rivaling the leading proprietary models (e.g., GPT-4o) and open-access models (e.g., Llama 3-V 405B and InternVL 2). Remarkably, NVLM 1.0 shows improved text-only performance over its LLM backbone after multimodal training.
 
 ## Remote Local Development
 

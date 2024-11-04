@@ -126,65 +126,6 @@ async def mm_q_and_a_v2(req_data: MutliModalRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/mm-q-and-a-old")
-async def mm_q_and_a(req_data: MutliModalRequest):
-    """
-    This function is used for asking questions about images in the UI (multi-modal RAG)
-    """
-    try:
-        # Fix padding if needed
-        base64_image = fix_base64_padding(
-            req_data.image.split(",")[1]
-        )  # Ensure you only decode the base64 part
-
-        # Decode the base64 image
-        image_data = base64.b64decode(base64_image)
-
-        # Use PIL to open the image
-        image = Image.open(BytesIO(image_data))
-
-        # Optionally, perform any manipulation on the image if needed
-        # Example: Resize the image (if required)
-        # image = image.resize((512, 512))
-
-        # Save the image into a BytesIO object to send it as a file
-        buffered = BytesIO()
-        image.save(buffered, format="PNG")
-        buffered.seek(0)  # Move the cursor to the beginning of the buffer
-
-        # Prepare the data for the qwen2-vl API call
-        files = {"image": ("image.png", buffered, "image/png")}
-        data = {"prompt": req_data.prompt}
-
-        # Make the API call to qwen2-vl
-        qwen2_vl_url = "http://192.168.5.173:8000/inference"
-        vision_model_response = requests.post(
-            qwen2_vl_url, files=files, data=data
-        )  # Sending as multipart/form-data
-
-        # filter by chapters associated with the queried image
-        filters = MetadataFilters(
-            filters=[ExactMatchFilter(key="chapter", value=str(req_data.chapter))]
-        )
-        query_engine = get_query_engine_for_multi_modal(filters)
-
-        # Check if the request was successful
-        if vision_model_response.status_code == 200:
-            # the result from Qwen2-VL (image comprehension)
-            result = vision_model_response.json()
-            response = query_engine.query(result["response"])
-        else:
-            raise HTTPException(
-                status_code=response.status_code, detail="Error from qwen2-vl service"
-            )
-
-        return QAQueryResponse(
-            response=response[0].message.content, metadata=response[1]
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
 if __name__ == "__main__":
     import uvicorn
 

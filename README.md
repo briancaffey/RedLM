@@ -1,5 +1,7 @@
 # RedLM
 
+![RedLM](/static/redlm/title.png)
+
 ## About
 
 RedLM is an application for the study of Redology, or the study of one of China's greatest literary works: Dream of the Red Chamber. RedLM is built with software frameworks from NVIDIA and LlamaIndex and uses leading Chinese language models to perform Q&A based on both text and images. This application was developed for the NVIDIA and LlamaIndex Developer Contest.
@@ -111,7 +113,7 @@ You can read more about the `01-ai/Yi` model series on [their GitHub repo](https
 
 ### (small) Vision Language Models
 
-I wrote a simple FastAPI service based on the `Qwen/Qwen2-VL-2B-Instruct` quickstart example [here](https://huggingface.co/Qwen/Qwen2-VL-2B-Instruct#quickstart) using Claude 3.5 Sonnet. Most of the code for this project was written with Cluade 3.5 Sonnet (using their generous free plan!)
+I wrote a simple FastAPI service based on the `Qwen/Qwen2-VL-2B-Instruct` quickstart example [here](https://huggingface.co/Qwen/Qwen2-VL-2B-Instruct#quickstart) using Claude 3.5 Sonnet. Most of the code for this project was written with Claude 3.5 Sonnet (using their generous free plan!)
 
 TODO: Since I wrote this service, Qwen2.5 models have been released, update this service to use the Qwen2.5 models.
 
