@@ -509,7 +509,7 @@ I tried uninstalling and reinstalling different versions of the NVIDIA drivers a
 
 I selected LLMs that run efficiently on RTX PCs, are available in the NVIDIA API catalog, and offer strong bilingual support in Chinese and English, ensuring compatibility, performance, and linguistic flexibility. Here are the models that I ended up using with RedLM:
 
-### `01-ai/Yi-1.5-9B-Chat` and `01-ai/Yi-Large`
+### `01-ai/Yi-1.5-9B-Chat` and `nvidia/yi-large`
 
 I used `01-ai/Yi-1.5-9B-Chat` for most of the LLM inference while developing RedLM on my RTX PCs. [This model family](https://github.com/01-ai/Yi) performs well on both Chinese and English benchmarks, and has a variety of model sizes. I was able to try using the `01-ai/yi-large` model from the NVIDIA API catalog when using remote cloud inference. I used the `vllm/vllm-openai:latest` container to run this locally.
 
@@ -583,6 +583,18 @@ ChatTTS is one of the most impressive open-source models I have seen for generat
 ![ChatTTS UI](/static/redlm/chattts_ui.png)
 
 I was planning on streaming the narration audio for Q&A answers using my ChatTTS API service, but I didn’t get around to doing this. Instead, I just used the Gradio application to generate the Chinese narration for Q&A and image Q&A examples included in the video.
+
+### RedLM Deep Dive video with NotebookLM
+
+NotebookLM is a new application from Google that is a truly magical application of retrieval augmented generation.
+
+> NotebookLM is a research and note-taking online tool developed by Google Labs that uses artificial intelligence, specifically Google Gemini, to assist users in interacting with their documents. It can generate summaries, explanations, and answers based on content uploaded by users.
+
+I used NotebookLM to generate a "Deep Dive" podcast episode using only this article. I was pretty impressed with what it was able to produce, and I wanted to share it as part of this project, so I used Blender and some Python scripts to put together a simple and engaging visualization.
+
+![Deep Dive video in Blender](/static/redlm/deep_dive_blender.png)
+
+The `openai/whisper-base` model was used to get time stamps for the start and end of each spoken word using Automated Speech Recognition (ASR). A speaker segmentation library called [`pyannote/audio`](https://github.com/pyannote/pyannote-audio) was used to perform speaker diarization. This is an interesting algorithm that can segment any number of distinct speakers in an audio recording using a series of models and a discrete-time stochastic process known as the [Chinese restaurant process](https://en.wikipedia.org/wiki/Chinese_restaurant_process). This gave a list of time intervals with a speaker ID, and I used the intervals to attribute a speaker ID to each word. Then I segmented the audio into two files using this data and used the files to generate audio waveforms using Blender's geometry nodes. Another script was used to animate each word of as it is spoken in one of two positions for each speaker.
 
 ## Final thoughts
 
