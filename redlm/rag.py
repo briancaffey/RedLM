@@ -126,7 +126,7 @@ class QAndAQueryEngine(CustomQueryEngine):
         logger.info("Handling custom query...")
         # if image_description is present, we are processing a multi-modal request (a query about an image)
         if image_description:
-            logger.info("💬Text-based Q&A query")
+            logger.info("🖼️Image-based Q&A query")
             if is_chinese_text(user_question):
                 logger.info("🇨🇳Text is Chinese")
                 prompt = mm_q_and_a_prompt
@@ -134,7 +134,7 @@ class QAndAQueryEngine(CustomQueryEngine):
                 logger.info("🇬🇧Text is English")
                 prompt = mm_q_and_a_prompt_english
         else:
-            logger.info("🖼️Image-based Q&A query")
+            logger.info("💬Text-based Q&A query")
             if is_chinese_text(user_question):
                 logger.info("🇨🇳Text is Chinese")
                 prompt = q_and_a_prompt
