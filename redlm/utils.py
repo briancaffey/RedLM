@@ -1,10 +1,12 @@
 import os
 import requests, base64
 import base64
+import logging
 from io import BytesIO
 from dotenv import load_dotenv
 from PIL import Image
 
+logger = logging.getLogger('uvicorn.info')
 load_dotenv()
 
 
@@ -19,8 +21,12 @@ from llama_index.core import (
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.vector_stores.milvus import MilvusVectorStore
 
+from llama_index.core import Settings
+from llama_index.core.callbacks import CallbackManager
+from langfuse.llama_index import LlamaIndexCallbackHandler
 
-def get_llm(model_name=None):
+
+def get_llm(model_name=None, is_completion_model=None):
     """
     Helper function for setting the LLM to use for inference
     - LLM options are configured via environment variables
@@ -32,6 +38,11 @@ def get_llm(model_name=None):
     MODEL_NAME = model_name or os.environ.get(
         "LLM_NAME", "baichuan-inc/baichuan2-13b-chat"
     )
+
+    if is_completion_model:
+        logger.info("Completion Model Info:")
+    else:
+        logger.info("Chat Model Info:")
 
     # use NVIDIA API catalog if NVIDIA_API_KEY is set and valid
     if os.environ.get("NVIDIA_API_KEY"):
@@ -45,7 +56,7 @@ def get_llm(model_name=None):
         #   01-ai/yi-large
         #   qwen/qwen2-7b-instruct
         model = NVIDIA(model=MODEL_NAME)
-        print("Using NVIDIA Cloud API for inference")
+        logger.info("🟩Using NVIDIA Cloud API for inference")
 
     # otherwise, use a generic OpenAI API compatible service, e.g. vLLM
     else:
@@ -57,9 +68,12 @@ def get_llm(model_name=None):
             api_key="None",
             max_tokens=1024,
         )
-        print("Using local model for inference")
+        logger.info("🖥️Using local model for inference")
 
-    print(f"Model: {MODEL_NAME}")
+    if is_completion_model:
+        logger.info(f"Completion Model: {MODEL_NAME}")
+    else:
+        logger.info(f"Chat Model: {MODEL_NAME}")
 
     return model
 
@@ -82,7 +96,7 @@ def get_index():
         VECTORDB_URI = f"http://{VECTORDB_SERVICE_HOST}:{VECTORDB_SERVICE_PORT}"
 
     if VECTORDB_URI and USE_EXTERNAL_VECTORDB:
-        print("Using Milvus vector database")
+        logger.info("🦅Using Milvus vector database...")
         vector_store = MilvusVectorStore(
             # BAAI/bge-small-{en,zh}-v1.5 has Dimension of 384, Sequence Length of 512
             # https://huggingface.co/BAAI/bge-small-zh-v1.5#evaluation
@@ -158,7 +172,7 @@ def process_mm_qa_request(req_data):
 
     - req_data contains the prompt question and the base64 image data
     - this info is used to get a description of the image (in Chinese or English)
-    - define logic for 2 major logical flows: qwen2-vl and llama-3.2-90b-vision-instruct
+    - define logic for 2 major logical flows: inference with qwen2-vl and llama-3.2-90b-vision-instruct
     """
 
     image_b64 = req_data.image
@@ -265,3 +279,31 @@ def is_chinese_text(text: str) -> bool:
     english_count = sum(1 for char in text if "a" <= char.lower() <= "z")
 
     return chinese_count > english_count
+
+
+def configure_observability():
+    """
+    Configure Observability and Tracing
+    """
+
+    LANGFUSE_SERVICE_HOST = os.environ.get("LANGFUSE_SERVICE_HOST", "localhost")
+    LANGFUSE_SERVICE_PORT = os.environ.get("LANGFUSE_SERVICE_PORT", "3030")
+    LANGFUSE_DOMAIN = f"http://{LANGFUSE_SERVICE_HOST}:{LANGFUSE_SERVICE_PORT}"
+    LANGFUSE_SECRET_KEY = os.environ.get("LANGFUSE_SECRET_KEY", None)
+    LANGFUSE_PUBLIC_KEY = os.environ.get("LANGFUSE_PUBLIC_KEY", None)
+    os.environ["LANGFUSE_HOST"] = LANGFUSE_DOMAIN
+
+    USE_LANGFUSE = LANGFUSE_PUBLIC_KEY and LANGFUSE_SECRET_KEY
+
+    if USE_LANGFUSE:
+        logger.info("🪢 Using Langfuse for Tracing and Observability ")
+        langfuse_callback_handler = LlamaIndexCallbackHandler(
+            public_key=LANGFUSE_PUBLIC_KEY,
+            secret_key=LANGFUSE_SECRET_KEY,
+            host=LANGFUSE_DOMAIN,
+        )
+
+        # Settings = CallbackManager([langfuse_callback_handler])
+
+        langfuse_callback = CallbackManager([langfuse_callback_handler])
+        return langfuse_callback

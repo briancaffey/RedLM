@@ -1,16 +1,10 @@
-import base64
 from typing import List, Optional
-from io import BytesIO
-import requests
 
-from fastapi import FastAPI, HTTPException, Form
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from llama_index.core.vector_stores import ExactMatchFilter, MetadataFilters
 from pydantic import BaseModel
-from PIL import Image
 
-from llama_index.core.llms import ChatMessage
 
 from .rag import (
     get_qa_query_engine,
@@ -18,8 +12,9 @@ from .rag import (
     get_query_engine_for_multi_modal,
 )
 
-from .utils import process_mm_qa_request
+from .utils import process_mm_qa_request, configure_observability
 
+configure_observability()
 
 app = FastAPI()
 app.add_middleware(
@@ -51,7 +46,7 @@ class QAQueryResponse(BaseModel):
     image_desc: Optional[str] = None
 
 
-class MutliModalRequest(BaseModel):
+class MultiModalRequest(BaseModel):
     prompt: str
     image: str
     chapter: int
@@ -83,19 +78,14 @@ async def perform_q_and_a(request: QueryRequest):
     return QAQueryResponse(response=response[0].message.content, metadata=response[1])
 
 
-def fix_base64_padding(data: str) -> str:
-    # Add padding if necessary
-    return data + "=" * ((4 - len(data) % 4) % 4)
-
-
 @app.post("/mm-q-and-a")
-async def mm_q_and_a_v2(req_data: MutliModalRequest):
+async def mm_q_and_a_v2(req_data: MultiModalRequest):
     """
     This function does the following
     - passes image and prompt data to the process_mm_qa_request function for image description
     - uses this data to make a query using the multi-modal QA Query engine
     - returns the results of the multi-modal QA query engine
-    - Depending on configuration, either fuyu or Qwen2-VL is used to process image data
+    - Depending on configuration, either `meta/llama-3.2-90b-vision-instruct` or `Qwen2-VL-2B` (local service) is used to process image data
     """
     try:
         # response is the text description of the image in Chinese
@@ -113,8 +103,7 @@ async def mm_q_and_a_v2(req_data: MutliModalRequest):
         # here we filter for the different
         query_engine = get_query_engine_for_multi_modal(filters)
 
-        response = query_engine.query(image_description)
-        print(response)
+        response = query_engine.custom_query(image_description=image_description, user_question=req_data.prompt)
 
         return QAQueryResponse(
             response=response[0].message.content,

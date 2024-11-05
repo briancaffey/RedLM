@@ -10,7 +10,7 @@ model = OpenAILike(
     model="01-ai/Yi-1.5-9B-Chat",
     api_base="http://localhost:8000/v1",
     api_key="None",
-    # keep this number small since we don't need a long explination for multiple-choice test evaluation
+    # keep this number small since we don't need a long explanation for multiple-choice test evaluation
     max_tokens=16,
 )
 

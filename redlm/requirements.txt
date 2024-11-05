@@ -3,6 +3,7 @@ llama-index-embeddings-huggingface
 llama-index-llms-nvidia
 llama-index-llms-openai-like
 llama-index-vector-stores-milvus
+langfuse
 fastapi[standard]
 black
 python-dotenv

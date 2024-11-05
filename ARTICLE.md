@@ -451,6 +451,18 @@ Source: [https://docs.llamaindex.ai/en/stable/#getting-started](https://docs.lla
 
 I was able to expand this simple example to implement the text and image Q&A bots for RedLM fairly easily. The application I built is somewhat similar to the [Full-Stack Web App with LLamaIndex](https://docs.llamaindex.ai/en/stable/understanding/putting_it_all_together/apps/fullstack_app_guide/) included in their documentation.
 
+### Observability and Tracing with Langfuse
+
+It is never too soon to add observability and tracing to a RAG application! I learned this the hard way after doing some refactoring of prompts and `CustomQueryEngine` logic.
+
+> Langfuse is an open source LLM engineering platform to help teams collaboratively debug, analyze and iterate on their LLM Applications. With the Langfuse integration, you can seamlessly track and monitor performance, traces, and metrics of your LlamaIndex application. Detailed traces of the LlamaIndex context augmentation and the LLM querying processes are captured and can be inspected directly in the Langfuse UI.
+
+LlamaIndex supports lots of different observability and tracing solutions. I tried using [Langfuse](https://langfuse.com/) (YC W23) which is an open-source option that has a self hosted option.
+
+![Langfuse tracing for RedLM](/static/redlm/langfuse.png)
+
+Langfuse came in handy when debugging the prompts for the image-based Q&A bot. This screenshot shows a trace of a multi-modal Q&A bot query about the fire at the Gourd Temple that occurs in Chapter 1 of the book.
+
 ## NVIDIA inference stack (TensorRT-LLM and build.nvidia.com)
 
 The LLM API for TensorRT-LLM is a very nice developer experience compared with my earlier attempts with manually building inference engines. The roadmap for TensorRT-LLM looks promising, I’m looking forward to support for an OpenAI Compatible API and more models. NVIDIA NIMs using TensorRT-LLM are an easy way to run models as OpenAI compatible API servers, but the selection of models is still pretty limited. vLLM provides a strong alternative with a wide range of support models. NVIDIA NIMs for LLMs build on vLLM libraries and the TensorRT-LLM library, so it is helpful to have an understanding of both of these libraries to stay on the bleeding edge of performant inference engines.
