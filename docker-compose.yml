@@ -36,6 +36,9 @@ services:
     container_name: redlm-ui
     environment:
       - NODE_ENV=development
+      - NUXT_PUBLIC_REDLM_API_BASE=http://localhost
+    # env_file:
+    #   - ui/.env
     volumes:
       - ./ui:/app  # Mount the current directory to /app in the container
       - /app/node_modules  # Avoid overwriting the node_modules inside the container
@@ -45,3 +48,14 @@ services:
     ports:
       - "3000:3000"  # Expose the app on port 3000
     command: yarn dev --host  # Run the Nuxt dev server, use --host to expose on 0.0.0.0
+
+  nginx:
+    build:
+      context: ./services/nginx
+      dockerfile: Dockerfile
+    container_name: nginx-proxy
+    ports:
+      - "80:80"  # Expose port 80
+    depends_on:
+      - redlm-api
+      - redlm-ui
