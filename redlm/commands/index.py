@@ -11,7 +11,7 @@ import json
 from llama_index.core import Document, Settings, VectorStoreIndex
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 
-from utils import get_index
+from utils.misc import get_index
 
 
 en_embedding_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en-v1.5")

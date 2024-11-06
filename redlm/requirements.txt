@@ -2,6 +2,7 @@ llama-index
 llama-index-embeddings-huggingface
 llama-index-llms-nvidia
 llama-index-llms-openai-like
+llama-index-utils-workflow
 llama-index-vector-stores-milvus
 langfuse
 fastapi[standard]

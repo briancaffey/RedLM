@@ -6,13 +6,13 @@ from llama_index.core.vector_stores import ExactMatchFilter, MetadataFilters
 from pydantic import BaseModel
 
 
-from .rag import (
+from .utils.rag import (
     get_qa_query_engine,
     get_q_and_a_query_engine,
     get_query_engine_for_multi_modal,
 )
 
-from .utils import process_mm_qa_request, configure_observability
+from .utils.misc import process_mm_qa_request, configure_observability
 
 configure_observability()
 

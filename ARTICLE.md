@@ -451,6 +451,12 @@ Source: [https://docs.llamaindex.ai/en/stable/#getting-started](https://docs.lla
 
 I was able to expand this simple example to implement the text and image Q&A bots for RedLM fairly easily. The application I built is somewhat similar to the [Full-Stack Web App with LLamaIndex](https://docs.llamaindex.ai/en/stable/understanding/putting_it_all_together/apps/fullstack_app_guide/) included in their documentation.
 
+Most of the early development I did on this project used the `CustomQueryEngine`. Later I tried using [LlamaIndex Workflows](https://docs.llamaindex.ai/en/stable/module_guides/workflow/) to better organize the logic in the text and image-based Q&A bots.
+
+Using LlamaIndex Workflows also helped me add additional logic in a maintainable and standardized way. For example, the following workflow shows the basic RAG Q&A workflow with the addition of a Rerank step to ensure retrieval of the most relevant documents.
+
+![RedLM RAG Workflow](/static/redlm/rag_workflow.png)
+
 ### Observability and Tracing with Langfuse
 
 It is never too soon to add observability and tracing to a RAG application! I learned this the hard way after doing some refactoring of prompts and `CustomQueryEngine` logic.

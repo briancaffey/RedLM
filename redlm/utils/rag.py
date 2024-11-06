@@ -15,11 +15,13 @@ from llama_index.core.llms import ChatMessage
 from llama_index.core.query_engine import CustomQueryEngine
 from llama_index.core.retrievers import BaseRetriever
 from llama_index.core.response_synthesizers import BaseSynthesizer
+from llama_index.core.schema import NodeWithScore
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 
 from llama_index.llms.nvidia import NVIDIA
 from llama_index.llms.openai_like import OpenAILike
-from .utils import get_llm, get_index, is_chinese_text, configure_observability
+
+from .misc import get_llm, get_index, is_chinese_text, configure_observability
 
 langfuse_callback = configure_observability()
 logger = logging.getLogger('uvicorn.info')
@@ -111,6 +113,7 @@ class QAndAQueryEngine(CustomQueryEngine):
     RAG Completion Query Engine optimized for Q&A
 
     - this class handles both text-based Q&A bot queries and image-based Q&A bot queries
+    - this class can optionally be used with LlamaIndex workflows, in which case nodes_from_workflow will be used
     """
 
     retriever: BaseRetriever
@@ -118,7 +121,11 @@ class QAndAQueryEngine(CustomQueryEngine):
     llm: OpenAILike
     # qa_prompt: PromptTemplate
 
-    def custom_query(self, user_question: str = None, image_description: str = None):
+    def custom_query(
+            self, user_question: str = None,
+            image_description: str = None,
+            nodes_from_workflow: list[NodeWithScore] = None,
+        ):
         """
         user_question is the original query entered byt the user in the UI
         image_description is the description of the image returned by the VLM service
@@ -142,14 +149,21 @@ class QAndAQueryEngine(CustomQueryEngine):
                 logger.info("🇬🇧Text is English")
                 prompt = q_and_a_prompt_english
 
-        # do retrieval with RAG system
-        # if we are doing a text-based Q&A query, we only need to use the user query
-        if not image_description:
-            nodes = self.retriever.retrieve(user_question)
+        # if nodes_from_workflow are passed in, then we can use the ranked nodes from the RerankEvent
+        # otherwise we do the RAG retrieval here directly in the QAndAQueryEngine
+        if nodes_from_workflow:
+            logger.info("Using nodes from workflow...")
+            nodes = nodes_from_workflow
         else:
-            # here we want to try finding passages that closely align with the description of the image
-            # the original user query was already used in getting the image description, and it will be used again in the final query
-            nodes = self.retriever.retrieve(image_description)
+            logger.info("Querying nodes in CustomQueryEngine...")
+            # do retrieval with RAG system
+            # if we are doing a text-based Q&A query, we only need to use the user query
+            if not image_description:
+                nodes = self.retriever.retrieve(user_question)
+            else:
+                # here we want to try finding passages that closely align with the description of the image
+                # the original user query was already used in getting the image description, and it will be used again in the final query
+                nodes = self.retriever.retrieve(image_description)
 
         metadata = []
         # Collect the metadata into a list of dicts so that it can be sent to UI for references
