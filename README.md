@@ -21,31 +21,27 @@ The application is built with the following technologies:
 - Backend API built with Python, FastAPI and LlamaIndex
 - Frontend web UI built with Vue 3 and Nuxt 3
 - Inference services (either using local services or NVIDIA Cloud APIs)
+- Milvus vector database (optional)
+- Langfuse for observability (optional)
 
 The application can run on Mac, Windows and Linux. Using local inference services requires Linux.
 
 ### Backend
 
-There are three ways to run the backend application:
+There are two ways to run the backend application:
 
-- virtual environment (Mac, Windows, Linux)
-- docker (Linux recommended)
-- Kubernetes (Linux required)
+- virtual environment (tested on Mac and Linux; should work on WSL)
+- docker (test on Mac and Linux; should work on WSL )
 
-This README will cover instructions for running the backend API in a virtual environment on either Mac or Linux machines using the NVIDIA's Cloud APIs for inference. Docker and Kubernetes environment setup is documented separately:
+To get started, copy the `redlm/.env.sample` file into a new file called `redlm/.env`. Obtain an API key from [`build.nvidia.com`](https://build.nvidia.com) and add it to `NVIDIA_API_KEY` in `redlm/.env`. Also be sure to configure `LLM_NAME`, `COMPLETION_MODEL`, `VLM_MODEL_NAME` and `VLM_INVOKE_URL`. These can all use the default values found in the `redlm/.env.sample` file. These values can be changed to use different models available in NVIDIA's API catalog. Configuring local LLMs running on RTX workstations is covered at the end of this README file.
 
-- TODO: add docker documentation link
-- TODO: add k8s documentation link
-
-
-To get started with running the project in a virtual environment, copy the `redlm/.env.sample` file into a new file called `redlm/.env` and update the environment variables. To get started quickly, get an API key from `build.nvidia.com` and add it to `NVIDIA_API_KEY` in `redlm/.env`. For now, you can remove all other values from `redlm/.env`.
-
-Create a virtual environment in `redlm`:
+Create a virtual environment in the `redlm` directory:
 
 ```bash
 cd redlm
 python3 -m venv .venv
 source .venv/bin/activate
+pip install -r requirements.txt
 ```
 
 Next, build the VectorIndexStore with the following command (from inside the `redlm` directory):
@@ -75,21 +71,21 @@ fastapi dev main.py --port 8080
 
 ### Frontend
 
-The UI for RedLM is built with Vue 3 and Nuxt 3. It uses static assets (JSON files and PNG files) that live in the `redlm` directory, so you will need to create the following symbollic links:
+The UI for RedLM is built with Vue 3 and Nuxt 3. It uses static assets (JSON files and PNG files) that live in the `redlm` directory, so you will need to create the following symbolic links:
 
 ```
 ln -s $(pwd)/redlm/data/book $(pwd)/ui/public/
 ln -s $(pwd)/redlm/data/paintings $(pwd)/ui/public/img/paintings
 ```
 
-If this command does not work, you may need to manually copy the files over from `redlm/data` to the target directories:
+If this command does not work, you may need to manually copy the files over from `redlm/data` to the target directories. The files should be copied as follows:
 
 ```
 redlm/data/book/{1,2,3}.json -> ui/public/book/{1,2,3}.json
 redlm/data/paintings/{1,2,3}.png -> ui/public/img/paintings/{1,2,3}.png
 ```
 
-To run the frontend application, run the following commands:
+To run the frontend application, run the following commands (it is recommended to use Node v20.18.0 and yarn 1.22.22):
 
 ```
 cd ui
@@ -99,15 +95,45 @@ yarn dev
 
 Now you should be able to visit [localhost:3000](http://localhost:3000).
 
-The frontend application has two main features: text-based Q&A and image-based Q&A.
+## Features
 
-Text-based Q&A will answer questions about the book using retrieval augmented generation (RAG) with LlamaIndex.
+![RedLM Homepage](/static/redlm/homepage.png)
+
+This home page lists all of the chapters. Click on a chapter and view it.
+
+![RedLM chapter page](/static/redlm/chapterpage.png)
+
+The chapter page displays all of the chapter's associated images at the top of the page, and the text and translation is displayed below.
+
+- The left column is the original text
+- The center column is the original text rewritten in simple, modern Mandarin
+- The right column is a translation of the simple, Modern Mandarin into English
+
+Click on one of the smaller images at the top of the page to ask a question about the painting.
+
+![RedLM Image Q&A](/static/redlm/image_qa_example.png)
+
+Click and drag on a portion of the image and then enter a query in the text box below about that part of the image. The response is displayed in the red text box, and references used by Retrieval Augmented Generation system can be viewed by hovering over the green badges below the response. Hovering over the gray badge will display the original description of the image based on your question (without using reference material from the book). The response (in the red dialog box) incorporates the referenced passages and the image description in a custom prompt and attempts to explain the content of the image in the context of the image's associated chapter. This means that only paragraphs from the painting's associated chapter will be used to generate the response.
+
+This diagram shows the overall flow of data in the image Q&A bot.
+
+![Image Q&A Diagram](/static/redlm/redlm.drawio.png)
+
+1. The user selects part of an image and writes a question. This data is then sent to the RedLM API as a post request to the `/mm-q-and-a` endpoint (multi-modal Q&A).
+2. Vision language models are used to get a description of the image. Depending on the application configuration, this query can use models such as `Qwen/Qwen2-VL-2B-Instruct` on RTX PCs or using the NVIDIA API Catalog using larger models such as `meta/llama-3.2-90b-vision-instruct`. Not all vision language models have the same interface, so I added some logic to handle different model formats.
+3. The image description is used to fetch relevant documents from the Vector Database
+4. The full prompt with the image description and relevant documents is sent to the LLM. Again, inference for this step is done either with RTX PCs or using models from the `build.nvidia.com` API catalog.
+5. The response from the LLM is sent back to the browser and is displayed to the user as a chat message.
+
+The Q&A tab in the navigation menu allows for asking questions about the entire book.
+
+![Text Q&A example](/static/redlm/qa_example_flower_pedals_a.png)
+
+The image Q&A bot and the text Q&A bot support answer questions in both Chinese and English.
 
 ## Running services with docker
 
 This project supports running services in docker with docker compose.
-
-### `docker-compose.yml`
 
 The `docker-compose.yml` file in the root of this project contains services for running the FastAPI server and the Nuxt UI app. Running `docker compose up` will start these services.
 
