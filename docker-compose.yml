@@ -1,11 +1,12 @@
 services:
-  redlm-api:
+  # FastAPI Python app using LlamaIndex
+  redlm-api: &redlm
     build: redlm
     container_name: redlm-api
     command:
       - "fastapi"
       - "dev"
-      - "redlm/main.py"
+      - "main.py"
       - "--host"
       - "0.0.0.0"
       - "--port"
@@ -15,6 +16,7 @@ services:
     env_file:
       - redlm/.env
     environment:
+      # LLM settings
       - LLM_NAME
       - VLM_INVOKE_URL
       - VLM_SERVICE_HOST
@@ -25,9 +27,32 @@ services:
       - LLM_SERVICE_PORT
       - COMPLETION_MODEL
       - MODEL_NAME
+      # External DB
+      - USE_EXTERNAL_VECTORDB
+      - VECTORDB_SERVICE_HOST
+      - VECTORDB_SERVICE_PORT
+      # Langfuse for observability and tracing
+      - LANGFUSE_SERVICE_HOST
+      - LANGFUSE_SERVICE_PORT
+      - LANGFUSE_SECRET_KEY
+      - LANGFUSE_PUBLIC_KEY
     volumes:
       - ./redlm:/app/redlm
       - ./redlm/storage:/app/storage
+
+  # build the index
+  # uses either built-in in-memory VectorIndexStore or Milvus depending on configuration
+  redlm-index:
+    <<: *redlm
+    container_name: redlm-index
+    command:
+      - "python"
+      - "-m"
+      - "commands.index"
+    ports: []
+    restart: "on-failure"
+
+  # Vue 3 Nuxt app
   redlm-ui:
     build:
       context: ui
@@ -36,7 +61,7 @@ services:
     container_name: redlm-ui
     environment:
       - NODE_ENV=development
-      - NUXT_PUBLIC_REDLM_API_BASE=http://localhost
+      - NUXT_PUBLIC_REDLM_API_BASE=http://localhost:8080
     # env_file:
     #   - ui/.env
     volumes:
@@ -49,13 +74,14 @@ services:
       - "3000:3000"  # Expose the app on port 3000
     command: yarn dev --host  # Run the Nuxt dev server, use --host to expose on 0.0.0.0
 
-  nginx:
-    build:
-      context: ./services/nginx
-      dockerfile: Dockerfile
-    container_name: nginx-proxy
-    ports:
-      - "80:80"  # Expose port 80
-    depends_on:
-      - redlm-api
-      - redlm-ui
+  # experimental proxy server
+  # nginx:
+  #   build:
+  #     context: ./services/nginx
+  #     dockerfile: Dockerfile
+  #   container_name: nginx-proxy
+  #   ports:
+  #     - "80:80"  # Expose port 80
+  #   depends_on:
+  #     - redlm-api
+  #     - redlm-ui

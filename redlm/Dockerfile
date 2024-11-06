@@ -13,5 +13,7 @@ COPY . /app/redlm
 # Expose port 8000 for the FastAPI app
 EXPOSE 8000
 
+WORKDIR /app/redlm
+
 # Command to run the FastAPI app
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
