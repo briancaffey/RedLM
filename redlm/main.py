@@ -103,7 +103,9 @@ async def mm_q_and_a_v2(req_data: MultiModalRequest):
         # here we filter for the different
         query_engine = get_query_engine_for_multi_modal(filters)
 
-        response = query_engine.custom_query(image_description=image_description, user_question=req_data.prompt)
+        response = query_engine.custom_query(
+            image_description=image_description, user_question=req_data.prompt
+        )
 
         return QAQueryResponse(
             response=response[0].message.content,

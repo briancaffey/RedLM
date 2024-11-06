@@ -25,6 +25,7 @@ from utils.rag import (
     # get_query_engine_for_multi_modal,
 )
 
+
 class RetrieverEvent(Event):
     """Result of running retrieval"""
 
@@ -36,13 +37,14 @@ class RerankEvent(Event):
 
     nodes: list[NodeWithScore]
 
+
 # https://github.com/run-llama/llama_index/issues/3258
 # https://github.com/run-llama/llama_index/issues/11470#issuecomment-2456302654
 def custom_parse_choice_select_answer_fn(answer: str, num_choices: int):
     matches = re.findall(r"(Doc: \d+, Relevance: \d+)", answer)
     answer = ""
     for match in matches:
-        answer += match+"\n"
+        answer += match + "\n"
     _answer = answer
     return default_parse_choice_select_answer_fn(_answer, num_choices)
 
@@ -51,10 +53,9 @@ class RAGWorkflow(Workflow):
     """
     This is a LlamaIndex Workflow that demonstrates how to do RAG with
     """
+
     @step
-    async def retrieve(
-        self, ctx: Context, ev: StartEvent
-    ) -> RetrieverEvent | None:
+    async def retrieve(self, ctx: Context, ev: StartEvent) -> RetrieverEvent | None:
         """
         Entry point for RAG, triggered by a StartEvent with `query`.
 
@@ -80,7 +81,6 @@ class RAGWorkflow(Workflow):
         nodes = await retriever.aretrieve(query)
         print(f"Retrieved {len(nodes)} nodes.")
         return RetrieverEvent(nodes=nodes)
-
 
     @step
     async def rerank(self, ctx: Context, ev: RetrieverEvent) -> RerankEvent:
@@ -109,7 +109,9 @@ class RAGWorkflow(Workflow):
         print("Getting query engine..")
         qa_query_engine, _ = get_q_and_a_query_engine()
         print("Getting response from custom query engine")
-        response = qa_query_engine.custom_query(user_question=query, nodes_from_workflow=ev.nodes)
+        response = qa_query_engine.custom_query(
+            user_question=query, nodes_from_workflow=ev.nodes
+        )
         return StopEvent(result=response)
 
 

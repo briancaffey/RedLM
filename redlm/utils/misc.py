@@ -6,7 +6,7 @@ from io import BytesIO
 from dotenv import load_dotenv
 from PIL import Image
 
-logger = logging.getLogger('uvicorn.info')
+logger = logging.getLogger("uvicorn.info")
 load_dotenv()
 
 

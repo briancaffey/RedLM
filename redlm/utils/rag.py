@@ -24,7 +24,7 @@ from llama_index.llms.openai_like import OpenAILike
 from .misc import get_llm, get_index, is_chinese_text, configure_observability
 
 langfuse_callback = configure_observability()
-logger = logging.getLogger('uvicorn.info')
+logger = logging.getLogger("uvicorn.info")
 
 # LLMs
 # Completion Model - used primarily for evaluation, defaults to 01-ai/Yi-1.5-9B
@@ -122,10 +122,11 @@ class QAndAQueryEngine(CustomQueryEngine):
     # qa_prompt: PromptTemplate
 
     def custom_query(
-            self, user_question: str = None,
-            image_description: str = None,
-            nodes_from_workflow: list[NodeWithScore] = None,
-        ):
+        self,
+        user_question: str = None,
+        image_description: str = None,
+        nodes_from_workflow: list[NodeWithScore] = None,
+    ):
         """
         user_question is the original query entered byt the user in the UI
         image_description is the description of the image returned by the VLM service
@@ -182,11 +183,15 @@ class QAndAQueryEngine(CustomQueryEngine):
         # format the final query that will be used to respond to the query
         if image_description:
             logger.info("Formatting prompt for multi-modal request")
-            content = prompt.format(context_str=context_str, image_description=image_description)
+            content = prompt.format(
+                context_str=context_str, image_description=image_description
+            )
             logger.info(f"Prompt is \n\n{content}")
         else:
             logger.info("Formatting prompt")
-            content = prompt.format(context_str=context_str, user_question=user_question)
+            content = prompt.format(
+                context_str=context_str, user_question=user_question
+            )
             logger.info(f"Prompt is \n\n{content}")
 
         response = self.llm.chat(
