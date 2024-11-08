@@ -1,4 +1,3 @@
-import json
 import logging
 import os
 
@@ -49,6 +48,7 @@ qa_prompt = PromptTemplate(
     "答案：\n"
 )
 
+# Chinese prompt for text-based Q&A bot
 q_and_a_prompt = PromptTemplate(
     "这是相关的参考资料：\n"
     "---------------------\n"
@@ -58,6 +58,7 @@ q_and_a_prompt = PromptTemplate(
     "问题：{user_question}\n"
 )
 
+# English prompt for text-based Q&A bot
 q_and_a_prompt_english = PromptTemplate(
     "This is some related reference material:\n"
     "---------------------\n"
@@ -67,6 +68,7 @@ q_and_a_prompt_english = PromptTemplate(
     "Question: {user_question}\n"
 )
 
+# Chinese prompt for image-based Q&A bot
 mm_q_and_a_prompt = PromptTemplate(
     "这是书中相关的内容：\n"
     "{context_str}\n"
@@ -78,6 +80,7 @@ mm_q_and_a_prompt = PromptTemplate(
     "根据上述的信息，尽量解释上说的场景和书的关系。"
 )
 
+# English prompt for image-based Q&A bot
 mm_q_and_a_prompt_english = PromptTemplate(
     "Here is relevant content from the book:\n"
     "{context_str}\n"
@@ -131,23 +134,22 @@ class QAndAQueryEngine(CustomQueryEngine):
         user_question is the original query entered byt the user in the UI
         image_description is the description of the image returned by the VLM service
         """
-        logger.info("Handling custom query...")
         # if image_description is present, we are processing a multi-modal request (a query about an image)
         if image_description:
             logger.info("🖼️Image-based Q&A query")
             if is_chinese_text(user_question):
-                logger.info("🇨🇳Text is Chinese")
+                logger.info("🀄Text is Chinese")
                 prompt = mm_q_and_a_prompt
             else:
-                logger.info("🇬🇧Text is English")
+                logger.info("🅰️ Text is English")
                 prompt = mm_q_and_a_prompt_english
         else:
             logger.info("💬Text-based Q&A query")
             if is_chinese_text(user_question):
-                logger.info("🇨🇳Text is Chinese")
+                logger.info("🀄Text is Chinese")
                 prompt = q_and_a_prompt
             else:
-                logger.info("🇬🇧Text is English")
+                logger.info("🅰️ Text is English")
                 prompt = q_and_a_prompt_english
 
         # if nodes_from_workflow are passed in, then we can use the ranked nodes from the RerankEvent
@@ -182,13 +184,13 @@ class QAndAQueryEngine(CustomQueryEngine):
 
         # format the final query that will be used to respond to the query
         if image_description:
-            logger.info("Formatting prompt for multi-modal request")
+            logger.info("🔏Formatting prompt for multi-modal request")
             content = prompt.format(
                 context_str=context_str, image_description=image_description
             )
             logger.info(f"Prompt is \n\n{content}")
         else:
-            logger.info("Formatting prompt")
+            logger.info("🔏Formatting prompt")
             content = prompt.format(
                 context_str=context_str, user_question=user_question
             )

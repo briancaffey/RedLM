@@ -40,16 +40,15 @@ def get_llm(model_name=None, is_completion_model=None):
     )
 
     if is_completion_model:
-        logger.info("Completion Model Info:")
+        logger.info("ℹ️ Completion Model Info:")
     else:
-        logger.info("Chat Model Info:")
+        logger.info("ℹ️ Chat Model Info:")
 
     # use NVIDIA API catalog if NVIDIA_API_KEY is set and valid
     if os.environ.get("NVIDIA_API_KEY"):
         assert os.environ.get("NVIDIA_API_KEY").startswith(
             "nvapi-"
         ), "Invalid NVIDIA API key"
-        api_key = os.environ.get("NVIDIA_API_KEY")
 
         # NVIDIA API catalog model, defaults to Baichuan2-13B-Chat
         # Other options:
@@ -71,9 +70,9 @@ def get_llm(model_name=None, is_completion_model=None):
         logger.info("🖥️Using local model for inference")
 
     if is_completion_model:
-        logger.info(f"Completion Model: {MODEL_NAME}")
+        logger.info(f"🔘Completion Model: {MODEL_NAME}")
     else:
-        logger.info(f"Chat Model: {MODEL_NAME}")
+        logger.info(f"🔘Chat Model: {MODEL_NAME}")
 
     return model
 
@@ -96,7 +95,7 @@ def get_index():
         VECTORDB_URI = f"http://{VECTORDB_SERVICE_HOST}:{VECTORDB_SERVICE_PORT}"
 
     if VECTORDB_URI and USE_EXTERNAL_VECTORDB:
-        logger.info("🦅Using Milvus vector database...")
+        logger.info("🦅Using Milvus vector database")
         vector_store = MilvusVectorStore(
             # BAAI/bge-small-{en,zh}-v1.5 has Dimension of 384, Sequence Length of 512
             # https://huggingface.co/BAAI/bge-small-zh-v1.5#evaluation
@@ -109,10 +108,11 @@ def get_index():
             vector_store, storage_context=storage_context
         )
     else:
-        print("Loading index from storage directory...")
+        logger.info("🖥️Using in-memory embedding database")
+        logger.info("⏳Loading index from storage directory...")
         storage_context = StorageContext.from_defaults(persist_dir="storage")
         index = load_index_from_storage(storage_context)
-        print("Finished loading index.")
+        logger.info("✅Finished loading index.")
 
     return index, bool(USE_EXTERNAL_VECTORDB)
 
@@ -166,7 +166,7 @@ def fix_base64_padding(data: str) -> str:
     return data + "=" * ((4 - len(data) % 4) % 4)
 
 
-def process_mm_qa_request(req_data):
+def process_mm_qa_request(prompt, image_b64):
     """
     This function process requests for the multi-modal Q&A bot
 
@@ -175,8 +175,8 @@ def process_mm_qa_request(req_data):
     - define logic for 2 major logical flows: inference with qwen2-vl and llama-3.2-90b-vision-instruct
     """
 
-    image_b64 = req_data.image
-    prompt = req_data.prompt
+    # image_b64 = req_data.image
+    # prompt = req_data.prompt
 
     cn_prompt = "这张图片是一幅中国古典绘画的一部分。"
     en_prompt = "This is an image of a classical Chinese painting. "

@@ -1,33 +1,38 @@
+"""
+This script can be used for testing the RedLM API endpoint for text-based Q&A:
+
+/q-and-a-workflow
+"""
+
 import requests
-import json
 
 # Server URL
-url = "http://localhost:8080/q-and-a"
+url = "http://localhost:8000/q-and-a-workflow"
 
 # Sample query
-# query = "宝玉和谁打架？"
-# TODO: adjust RAG template
-query = """
-        "question": "秦钟的父亲是如何死的？[1分]",
-        "choices": [
-            [
-                "A",
-                "外感风寒、风毒之症"
-            ],
-            [
-                "B",
-                "被智能儿气死的"
-            ],
-            [
-                "C",
-                "生气引发旧病加重"
-            ],
-            [
-                "D",
-                "生气而诱发中风而死"
-            ]
-        ],
-"""
+query = "宝玉和谁打架？"
+
+# query = """
+#         "question": "秦钟的父亲是如何死的？[1分]",
+#         "choices": [
+#             [
+#                 "A",
+#                 "外感风寒、风毒之症"
+#             ],
+#             [
+#                 "B",
+#                 "被智能儿气死的"
+#             ],
+#             [
+#                 "C",
+#                 "生气引发旧病加重"
+#             ],
+#             [
+#                 "D",
+#                 "生气而诱发中风而死"
+#             ]
+#         ],
+# """
 
 # Prepare the request payload
 payload = {"query": query}
