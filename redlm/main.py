@@ -122,7 +122,6 @@ async def mm_q_and_a_workflow(req_data: MultiModalRequest):
             image_desc=result["image_description"],
         )
     except Exception as e:
-        # print(e)
         raise HTTPException(status_code=500, detail=str(e))
 
 

@@ -137,17 +137,6 @@ Source: https://medium.com/@kbdhunga/a-beginners-guide-to-similarity-search-vect
 Here is some of the code I wrote for the text-based Q&A bot using LlamaIndex’s `CustomQueryEngine` class to fetch the nodes from which I get the referenced paragraph text, chapter number and paragraph number.
 
 ```python
-# the prompt used in the query engine below with English translation in the comments
-q_and_a_prompt = PromptTemplate(
-    "这是相关的参考资料：\n" # Here is some related reference material:
-    "---------------------\n"
-    "{context_str}\n" # The retrieved paragraph text will be inserted here
-    "---------------------\n"
-    "根据上述的参考资料，回答下面的问题\n" # Based on the above reference material, answer the following question:
-    "问题：{query_str}\n" # Question: (the user question from the text box in the UI is added here)
-)
-
-
 class QAndAQueryEngine(CustomQueryEngine):
     """RAG Completion Query Engine optimized for Q&A"""
 
@@ -174,7 +163,7 @@ class QAndAQueryEngine(CustomQueryEngine):
             [
                 ChatMessage(
                     role="user",
-                    content=q_and_a_prompt.format(
+                    content=q_and_a_prompt.format( # the English and Chinese prompt templates are discussed below
                         context_str=context_str, query_str=query_str
                     ),
                 )
@@ -257,7 +246,29 @@ def is_chinese_text(text: str) -> bool:
     return chinese_count > english_count
 ```
 
-Then I would select the version of the prompt to use in the QueryEngine, either Chinese or English. This allowed the Q&A bot to answer questions in either Chinese or English, and it does not require translating back and forth between Chinese and English. However, this method relies on high-quality translations, so I don't expect English language questions to be answered as accurately as Chinese language questions. Here are some examples of the Q&A bot answering questions posed in English. The referenced materials include paragraphs from the English translation:
+Then I would select the version of the prompt to use in the QueryEngine, either Chinese or English. This allowed the Q&A bot to answer questions in either Chinese or English, and it does not require translating back and forth between Chinese and English. However, this method relies on high-quality translations, so I don't expect English language questions to be answered as accurately as Chinese language questions. Here are the Chinese and English prompts that I used for the text-based Q&A bot, as well as some examples of the Q&A bot answering questions in English. The referenced materials include paragraphs from the English translation.
+
+```python
+# Chinese prompt for text-based Q&A bot
+q_and_a_prompt = PromptTemplate(
+    "这是相关的参考资料：\n"
+    "---------------------\n"
+    "{context_str}\n" # context_str contains Chinese paragraphs retrieved via RAG query
+    "---------------------\n"
+    "根据上述的参考资料，回答下面的问题\n"
+    "问题：{user_question}\n"
+)
+
+# English prompt for text-based Q&A bot
+q_and_a_prompt_english = PromptTemplate(
+    "This is some related reference material:\n"
+    "---------------------\n"
+    "{context_str}\n" # context_str contains English paragraphs retrieved via RAG query
+    "---------------------\n"
+    "Based on the above material, answer the following question:\n"
+    "Question: {user_question}\n"
+)
+```
 
 ![Multi-modal Q&A example 1](/static/redlm/qa_example_01.png)
 
@@ -367,20 +378,28 @@ This flow chart shows how the image Q&A feature works.
 Here is the prompt I used for the image Q&A feature:
 
 ```python
-# multi-modal Q&A prompt
+# Chinese prompt for image-based Q&A bot
 mm_q_and_a_prompt = PromptTemplate(
-		# "here is relevant content from the book"
     "这是书中相关的内容：\n"
-    # the relevant chapters are added here
     "{context_str}\n"
     "---------------------\n"
-    "下面是场景的描述：\n" # "below is a description of a scene"
+    "下面是场景的描述：\n"
     "---------------------\n"
-    # the image description from the vision language model is added here
-    "{query_str}\n"
+    "{image_description}\n"
     "---------------------\n"
-    # "based on the above information, please explain the relationship between the scene and the book"
     "根据上述的信息，尽量解释上说的场景和书的关系。"
+)
+
+# English prompt for image-based Q&A bot
+mm_q_and_a_prompt_english = PromptTemplate(
+    "Here is relevant content from the book:\n"
+    "{context_str}\n"
+    "---------------------\n"
+    "Below is the description of a scene:\n"
+    "---------------------\n"
+    "{image_description}\n"
+    "---------------------\n"
+    "Based on the information provided above, try to explain the relationship between the described scene and the book content."
 )
 ```
 
@@ -451,9 +470,94 @@ Source: [https://docs.llamaindex.ai/en/stable/#getting-started](https://docs.lla
 
 I was able to expand this simple example to implement the text and image Q&A bots for RedLM fairly easily. The application I built is somewhat similar to the [Full-Stack Web App with LLamaIndex](https://docs.llamaindex.ai/en/stable/understanding/putting_it_all_together/apps/fullstack_app_guide/) included in their documentation.
 
-Most of the early development I did on this project used the `CustomQueryEngine`. Later I tried using [LlamaIndex Workflows](https://docs.llamaindex.ai/en/stable/module_guides/workflow/) to better organize the logic in the text and image-based Q&A bots.
+Most of the early development I did on this project used the `CustomQueryEngine`. Later I tried using [LlamaIndex Workflows](https://docs.llamaindex.ai/en/stable/module_guides/workflow/) to better organize the logic in the text and image-based Q&A bots. The same workflow `RAGWorkflow` is used to handle requests for both the text and image Q&A bot queries. Workflows also work seamlessly with asynchronous Python frameworks like FastAPI. Here's the API endpoint for the multimodal image-Q&A bot using a LlamaIndex Workflow:
 
-Using LlamaIndex Workflows also helped me add additional logic in a maintainable and standardized way. For example, the following workflow shows the basic RAG Q&A workflow with the addition of a Rerank step to ensure retrieval of the most relevant documents.
+```python
+@app.post("/mm-q-and-a")
+async def mm_q_and_a_workflow(req_data: MultiModalRequest):
+    """
+    This function handles Multimodal Q&A bot requests using a LlamaIndex workflow
+    """
+    try:
+        # parse data from request object
+        image_b64 = req_data.image
+        prompt = req_data.prompt
+        chapter = req_data.chapter
+
+        # setup LlamaIndex Workflow and run it with data from request
+        w = RAGWorkflow(timeout=None)
+        result = await w.run(query=prompt, image_data=image_b64, chapter_number=chapter)
+
+        # return response
+        return QAQueryResponse(
+            response=result["response"].message.content,
+            metadata=result["metadata"],
+            image_desc=result["image_description"],
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+```
+
+Using LlamaIndex Workflows also helped me add additional logic in a maintainable and standardized way. For example, I expanded the `RAGWorkflow` logic to include LLM-based re-ranking in order to ensure retrieval of the most relevant documents for my chatbot queries. This technique increases request latency, but this is an acceptable tradeoff for an application like RedLM.
+
+### LLMRerank
+
+LLM Rerank was an interesting technique to try out, and LlamaIndex provides `LLMRerank` to make the implementation as simple as possible. Here's my understanding of how it works:
+
+- LLMRerank searches in the vector database for a high number of documents that are relevant to your query. This is done using cosine similarity, which essentially compares the vectors that represent the query and the documents.
+- Next, LLMRerank goes through a process of assigning a numerical to each document to score relevancy. It does this via a special prompt that requests relevancy score for each document in batches.
+- For example, I configured `LLMRerank` to initially fetch 4 documents from the vector database based on cosine similarity. Then in batches of 2, relevancy scores are assigned. Finally, the top 2 most relevant documents based on the LLM-give scores are used to make the RAG query.
+- Adding LLMRerank can require a number of additional queries based on how you configure the batch size and the number of documents you would like to compare. This will increase latency for your application and use more resources to make the extra calls.
+
+Here's an example LLM query that `LLMRerank` uses to do assign scores:
+
+![LLMRerank Prompt](/static/redlm/llmrerank_prompt.png)
+
+Here are logs from my application showing what happens inside the workflow.
+
+Application for text-base Q&A query:
+
+```
+INFO:     💬Request for Q&A chatbot: query='宝玉和谁打架？'
+INFO:     🔀Routing Workflow to next step
+INFO:     💬Routing to QueryEvent
+INFO:     🧮Query the vector database with: 宝玉和谁打架？
+INFO:     🖥️Using in-memory embedding database
+INFO:     ⏳Loading index from storage directory...
+INFO:     ✅Finished loading index.
+INFO:     📐Retrieved 4 nodes.
+INFO:     🔀Doing LLMRerank
+INFO:     ℹ️ Chat Model Info:
+INFO:     🟩Using NVIDIA Cloud API for inference
+INFO:     🔘Chat Model: baichuan-inc/baichuan2-13b-chat
+INFO:     🔢Reranked nodes to 2
+INFO:     🤖Doing inference step
+INFO:     ⚙️ Getting query engine..
+INFO:     🔎Getting response from custom query engine
+INFO:     💬Text-based Q&A query
+INFO:     🀄Text is Chinese
+INFO:     Using nodes from workflow...
+INFO:     🔏Formatting prompt
+INFO:     Prompt is
+
+这是相关的参考资料：
+---------------------
+宝玉从来没有经历过这样的痛苦。起初，他觉得被打得很痛，乱喊乱叫。后来，他的气变得虚弱，声音变得嘶哑，无法说话。众门客见他被打得很惨，赶上来恳求他停下来。贾政不肯听，说：“你们知道他干了什么坏事，还能饶他吗？平时都是你们这些人把他带坏了，现在到了这步田地，你们还来劝他。明天，如果他杀父弑君，你们才不劝吗？”
+
+宝玉从来没有经历过这样的痛苦。起初，他觉得打得很痛，乱喊乱叫。后来，他的气变得虚弱，声音变得嘶哑，无法说话。众门客见他被打得很惨，赶上来恳求他停下来。贾政不肯听，说：“你们知道他干了什么坏事，还能饶他吗？平时都是你们这些人把他带坏了，现在到了这步田地，你们还来劝他。明天，如果他杀父弑君，你们才不劝吗？”
+---------------------
+根据上述的参考资料，回答下面的问题
+问题：宝玉和谁打架？
+
+Response...
+宝玉和贾政打架。
+```
+
+My question here was basically asking "Who gets in a fight with Baoyu?" The reply says that his father, Jiazheng, gets in a fight with Baoyu, and the documents that are used here very similar, differing by only one character. One of the documents is supposed to be and English translation, but in fact there was a failure in the translation for this paragraph and it "translated" the Chinese by simply repeating it. A translation of this paragraph using GPT 4o describes a tense scene between protagonist Jia Baoyu and his father Jia Zheng:
+
+> Baoyu had never endured such agony before. At first, he felt the pain intensely and cried out loudly. Later, his breath grew weak, his voice turned hoarse, and he couldn’t speak. The attendants, seeing how severely he was being beaten, rushed forward to plead for him to stop. Jia Zheng refused to listen, saying, “Do you know the misdeeds he’s committed, and still you want to spare him? Normally, it’s you people who lead him astray, and now that it’s come to this, you still try to persuade him? Tomorrow, if he were to commit patricide or treason, would you still not advise him?”
+
+Another benefit of LlamaIndex workflows is the ability to create visualizations of each step, the branches between them and the overall flow of events and the functions that accept/emit them as arguments/return values. It took a little bit of getting used to the patterns used to create workflows, but the documentation for Workflows provided a good starting point that I could adapt for my application. Here's a visualization of the LlamaIndex Workflow that is used by the image and text-based Q&A bots:
 
 ![RedLM RAG Workflow](/static/redlm/rag_workflow.png)
 
@@ -635,3 +739,7 @@ The Dream of the Red Chamber, originally titled The Story of the Stone, is one o
 It was a lot of fun to work on this project with tools from LlamaIndex and NVIDIA. With AI technology, GPUs are now essentially sentient stones, and I was able to share this important touchstone of the human experience with my computers using LlamaIndex and open source language models. In turn, RedLM shared with me delightful insights into world of Dream of the Red Chamber.
 
 ![Story of a Stone](/static/redlm/stone_story.png)
+
+![Story of a Stone Analysis](/static/redlm/stone_story_analysis.png)
+
+> This scene describes a piece of traditional Chinese painting, depicting two elderly figures conversing amidst mountains and rivers. The painting likely visually represents the scene from the book where a monk and a Taoist are chatting at the foot of Qinggeng Peak. The two elderly figures in the painting may represent the monk and Taoist from the book, discussing their discovery of a bright and pristine stone, and planning to take it to a bustling, splendid place for a happy life. The painting’s elements—mountains, peaks, flowing water, trees, and rocks—might echo the book's descriptions, illustrating the natural environment at the base of Qinggeng Peak where the monk and Taoist reside. The painting’s tranquil and harmonious atmosphere may also align with the storyline, expressing the monk and Taoist's care for the stone and their wish for it to live a happy life. In summary, this painted scene might be an artistic portrayal of the story between the monk, the Taoist, and the stone from the book, using visual elements and ambiance to convey the narrative and themes within the story.
