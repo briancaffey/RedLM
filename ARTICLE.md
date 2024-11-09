@@ -23,7 +23,7 @@ comments: true
 
 ## td;dr
 
-RedLM is a new way to study art and literature powered by artificial intelligence. It is an application that applies LLMs to the study of one of China’s most famous literary works: Dream of the Red Chamber. It uses leading Chinese language models and vision language models from Chinese AI groups including Alibaba’s Qwen team, Baichuan Intelligence Technology and 01.AI. RedLM uses tools, techniques and services from NVIDIA and LlamaIndex including NVIDIA NIMs, Retrieval Augmented Generation and Multi-Modal RAG with vision language models. This project is my submission for the NVIDIA and LlamaIndex Developer Contest.
+RedLM is a new way to study art and literature powered by artificial intelligence. It is an application that applies LLMs to the study of one of China’s most famous literary works: Dream of the Red Chamber. It uses leading language and vision models from Chinese AI groups including Alibaba’s Qwen, Baichuan Intelligence Technology and 01.AI. RedLM uses tools, techniques and services from NVIDIA and LlamaIndex including NVIDIA NIMs, Retrieval Augmented Generation and Multi-Modal RAG with vision language models. This project is my submission for the NVIDIA and LlamaIndex Developer Contest.
 
 This article will cover how I built the project, challenges I faced and some of the lessons I learned while working with NVIDIA and LlamaIndex technologies.
 
@@ -224,7 +224,7 @@ I did most of the development for this project using the in-memory VectorIndexSt
 
 ![Vector Database Options](/static/redlm/vectordbs.png)
 
-There are a LOT of options to consider when picking a vector database for a RAG application. Milvus has a highly decoupled architecture, it is fully open source and I had seen it in some examples, so I decided to give it a try.
+There are a LOT of options to consider when picking a vector database for a RAG application. Milvus has a highly decoupled architecture, it is fully open source and I had seen it in some examples in the [`NVIDIA/GenerativeAIExamples`](https://github.com/NVIDIA/GenerativeAIExamples/tree/main/RAG/examples/advanced_rag/multimodal_rag) repo, so I decided to give it a try.
 
 ![Milvus Vector Database Architecture](/static/redlm/milvus.png)
 
@@ -246,7 +246,7 @@ def is_chinese_text(text: str) -> bool:
     return chinese_count > english_count
 ```
 
-Then I would select the version of the prompt to use in the QueryEngine, either Chinese or English. This allowed the Q&A bot to answer questions in either Chinese or English, and it does not require translating back and forth between Chinese and English. However, this method relies on high-quality translations, so I don't expect English language questions to be answered as accurately as Chinese language questions. Here are the Chinese and English prompts that I used for the text-based Q&A bot, as well as some examples of the Q&A bot answering questions in English. The referenced materials include paragraphs from the English translation.
+This boolean value would then be used in the `CustomQueryEngine` to use either the Chinese or English `PromptTemplate`. This allowed the Q&A bot to answer questions in either Chinese or English, and it does not require translating back and forth between Chinese and English. However, this method relies on high-quality translations, so I don't expect English language questions to be answered as accurately as Chinese language questions. Here are the Chinese and English prompts that I used for the text-based Q&A bot, as well as some examples of the Q&A bot answering questions in English. The referenced materials include paragraphs from the English translation.
 
 ```python
 # Chinese prompt for text-based Q&A bot
@@ -272,17 +272,19 @@ q_and_a_prompt_english = PromptTemplate(
 
 ![Multi-modal Q&A example 1](/static/redlm/qa_example_01.png)
 
+Asking random questions like this one is a fun way to explore the many scenes of Dream of the Red Chamber.
+
 ![RAG Flower Pedal Example](/static/redlm/qa_example_flower_pedals.png)
 ![RAG Flower Pedal Example with Reference](/static/redlm/qa_example_flower_pedals_a.png)
 
 ## RedLM RAG Evaluation
 
-Examinations have long been a cornerstone of Chinese society, shaping individual aspirations, cultural values, and even government structures. This legacy began with the imperial civil service exams, kējǔ (科举), established during the Sui and Tang dynasties, and carries through in Modern China with the gaokao college entrance examination, both of which allow for unprecedented meritocratic routes to power and prestige. Given how widely this novel is studied in China, I was not surprised to find a wealth of examination questions written for students studying Dream of the Red Chamber.
+Examinations have long been a cornerstone of Chinese society, shaping individual aspirations, cultural values, and even government structures. This legacy began with the imperial civil service exams, kējǔ (科举), established during the Sui and Tang dynasties, and carries through in Modern China with the gaokao (高考) college entrance examination, both of which have allowed for unprecedented meritocratic routes to power and prestige. Given how widely this novel is studied in China, I was not surprised to find a wealth of examination questions written for students studying Dream of the Red Chamber.
 
-I used [a set of 1000 multiple choice questions about Dream of the Red Chamber on examcoo.com](https://www.examcoo.com/editor/do/view/id/246401) to evaluate the effectiveness of the RAG system I built with LlamaIndex. I wrote a script to parse the questions from the website HTML using ChatGPT (parsing HTML is one of my favorite use cases of LLMs!) I filtered out questions based on the following criteria:
+I used [a set of 1000 multiple choice questions about Dream of the Red Chamber on examcoo.com](https://www.examcoo.com/editor/do/view/id/246401) to evaluate the effectiveness of the RAG system I built with LlamaIndex. I wrote a script to parse the questions from the website HTML using ChatGPT (parsing HTML is one of my favorite use cases of LLMs!) I filtered the list of 1000 questions down to 877 questions based on the following criteria:
 
-- Four answer choices - some of the questions had more than four answer choices. I filtered questions with more than four answer choices to keep the evaluation simple. This would allow me to assume that random answer choices would have a 25% chance of being correct.
-- Only one answer - some questions had more than one answer. This would also help keep the evaluation logic simple.
+- **Four answer choices**: some of the questions had more than four answer choices. I filtered questions with more than four answer choices to keep the evaluation simple. This would allow me to assume that random answer choices would have a 25% chance of being correct.
+- **Only one answer**: For some questions the correct answer required selecting multiple answer choices. This would also help keep the evaluation logic simple.
 
 ![Multiple Choice Questions from Dream of the Red Chamber Test](/static/redlm/hlm_mcq.png)
 
@@ -339,13 +341,13 @@ The correct answer for this question is C.
 
 ## Multi-modal RAG for visual reasoning
 
-Qwen2-VL was released a few days before I heard about this contest. Qwen is the name of Alibaba’s AI Lab, and it is an abbreviation of the Chinese characters: 千问 (”qian wen”, meaning 1000 questions). VL stands for vision-language, meaning that the model is capable of understanding both text and images. I had tested out the previous version of Qwen’s vision-language model and was very impressed by how it could answer questions about images.
+Qwen2-VL is a new AI model that was released in late August 2024. Qwen is the name of Alibaba’s AI Lab, and it is an abbreviation of the Chinese characters: 千问 ("qian wen", meaning 1000 questions). VL stands for vision-language, meaning that the model is capable of understanding both text and images. I had tested out the previous version of Qwen’s vision-language model and was very impressed by how it could accurately describe the contents of images and also answer general questions about images.
 
-Sun Wen was a Qing-era painter who spent 36 years of his life creating a series of 230 paintings detailing scenes from Dream of the Red Chamber. These images are incredibly detailed and often contain multiple disjointed scenes in one painting. If you asked a Qwen-VL model to describe one of the images, you might get back a lengthy description, and the context window might easily be exceeded when including a resolution high enough for the model to properly “see” anything.
+Sun Wen was a Qing-era painter who spent 36 years of his life creating a series of 230 paintings capturing scenes from Dream of the Red Chamber. The paintings are incredibly detailed and often contain repeated figures in a temporal sequence. If you asked a Qwen-VL model to describe one of the images, it might return lengthy description that doesn't fully capture the full detail of the scene. It might also be difficult for a language model to "focus" on a portion of the whole image.
 
 ![Dream of the Red Chamber Painting 131](/static/redlm/painting_131.png)
 
-This gave me the idea to build a feature where a user can select part of a painting (by clicking and dragging on an image) and ask a question about that section of the painting alone. I knew that this could be done with something like HTML canvas, and I also knew that doing this on my own would take a very long time to write since I am at best a very casual frontend developer. It took me just a few minutes to write out the prompt and Claude 3.5 Sonnet wrote a perfect prototype in less than a minute. Here’s the prompt I used:
+This sparked the idea to create a feature where users can click and drag over an image to select part of a painting, then ask questions specifically about the selected portion. I knew that while this could be achieved with tools like HTML canvas, writing it on my own would be quite time-consuming. It took me just a few minutes to write out the prompt, and Claude 3.5 Sonnet generated a perfect prototype of this feature in under a minute. Here’s the prompt I used:
 
 > I'm going to describe a Vue component and I want you to write it using Vue 3 to the best of your ability.
 >
@@ -363,7 +365,9 @@ This gave me the idea to build a feature where a user can select part of a paint
 
 ![RedLM Image Q&A](/static/redlm/image-qa.png)
 
-This shows the final result of the UI I built for the image Q&A feature in RedLM. It uses a similar chat layout that the text-based Q&A feature uses, with the addition of the image preview included in the chat log. The user query in this example just says “Please describe the contents of the image”. Here is a diagram showing the overall flow of the image Q&A feature:
+This shows the final result of the UI I built for the image Q&A feature in RedLM. It uses a similar chat layout that the text-based Q&A feature uses, with the addition of the image preview included in the chat log. The user query in this example just says “Please describe the contents of the image”. This was the first image that I tested when building the image Q&A feature to see if the correct passage can be referenced based on the description of an image. This pulled the exact passage and the answer provides details about what happened (a fire broke out) where it happened (at the Gourd Temple) and why it happened (a Monk accidentally set an oil pot on fire).
+
+Here is a diagram showing the overall flow of data in the image Q&A feature:
 
 ![Diagram of RedLM Image Q&A with RAG and Vision Language Models](/static/redlm/redlm.drawio.png)
 
@@ -651,25 +655,11 @@ I didn't use this model in my project, but it came out recently and looks awesom
 
 > Today (September 17th, 2024), we introduce NVLM 1.0, a family of frontier-class multimodal large language models (LLMs) that achieve state-of-the-art results on vision-language tasks, rivaling the leading proprietary models (e.g., GPT-4o) and open-access models (e.g., Llama 3-V 405B and InternVL 2). Remarkably, NVLM 1.0 shows improved text-only performance over its LLM backbone after multimodal training.
 
-## Remote Local Development
-
-I use Tailscale for VPN access into my home network. This allows me to use VSCode to connect to folders on my PCs (Remote-SSH) and also lets me do things like portforwarding. For example, I can run the `microk8s dashboard-proxy` command and then port forward port `10443` to the remote IP for access to the Kubernetes dashboard with the following command:
-
-```
-ssh -L 10443:100.69.6.58:10443 brian@100.69.6.58
-```
-
-## CloudFlare Tunnels
-
-CloudFlare Tunnels is another product that is helpful for building, testing and sharing applications that run on my RTX PC cluster. It allows me to safely expose a service running on my home network to the public internet. For example, I can point [https://redlm.briancaffey.com](https://redlm.briancaffey.com) to `localhost:3000` where I'm running my Nuxt site locally. This serves traffic through CloudFlare's servers; traffic from the internet does go into my home network. I do this for a number of other services that run on my home PCs, such as image generation, etc.
-
 ## The success of Black Myth: Wukong
 
-I originally got the idea to build this project after seeing the release of Black Myth: Wukong. This game is a blockbuster success from a Chinese developer that tells the story of the Monkey King’s adventure in the Journey West universe. Journey West (西游记) is another one of the “Four Great Works” of Chinese literature. It tells the story of the legendary pilgrimage of the monk Xuanzang (also known as Tang Sanzang) to India, accompanied by his three disciples—Sun Wukong (the Monkey King), Zhu Bajie (Pigsy), and Sha Wujing (Sandy). The group travels to retrieve sacred Buddhist scriptures, facing numerous challenges, demons, and supernatural beings along the way.
+I originally got the idea to build this project after seeing the release of Black Myth: Wukong. This game is a blockbuster success from a Chinese developer that tells the story of the Monkey King’s adventure in the Journey West universe. Journey West (西游记) is another one of the “Four Great Works” of Chinese literature. It tells the story of the legendary pilgrimage of the monk Xuanzang (also known as Tang Sanzang) to India, accompanied by his three disciples—Sun Wukong (the Monkey King), Zhu Bajie (Pigsy), and Sha Wujing (Sandy). The group travels from China to India to retrieve sacred Buddhist scriptures, facing numerous challenges, demons, and supernatural beings along the way.
 
-The novel blends elements of adventure, mythology, and spiritual allegory, with Sun Wukong's mischievous nature and extraordinary powers adding humor and excitement. Through their journey, the characters grow and overcome personal flaws, ultimately achieving enlightenment and spiritual success.
-
-This game has set world records for numbers of concurrent players, and it has rewritten the narrative around what is capable with offline single-player games and on top of that it is developed by an obscure game studio from Shenzhen, China.
+The novel blends elements of adventure, mythology, and spiritual allegory, with Sun Wukong's mischievous nature and extraordinary powers adding humor and excitement. Through their journey, the characters grow and overcome personal flaws, ultimately achieving enlightenment and spiritual success. The video game adaptation has set world records for numbers of concurrent players, and it has rewritten the narrative around what is possible with single-player, offline games in the gaming industry.
 
 ![Black Myth: Wukong](/static/redlm/wukong.png)
 
@@ -677,7 +667,7 @@ Three renditions of Journey West: Songokū (The Monkey King) polychrome woodbloc
 
 ## RedLM video
 
-I created the video for this project using Blender. Blender is my favorite tool for 3D and its sequencer editor is a great non-linear video editing tool for simple projects. I used the following formula to create the video:
+I created the video for this project using Blender.The Blender sequencer editor is a great non-linear video editing tool for simple video projects like this one. I used the following formula to create the project video for RedLM:
 
 1. Background music: I used the AI music generation service called Suno with the prompt “mystical strange traditional Chinese music from the Qing Dynasty”. Here’s the link to my Suno playlist called “Qing Dynasty Music” where you can find the original song and some other good songs that I generated using this prompt. My [Qing Dynasty Music Playlist on Suno](https://suno.com/playlist/863ea0dd-1921-467c-8b69-16dbd126d966)
 2. Outline: For this project, the main sections are the introduction, then explaining each part with a short demo: translation, text-based Q&A, evaluation for text-based Q&A, image-based Q&A, and finally a short outro. I wrote an outline and then ChatGPT helped with filling out the content.
@@ -720,17 +710,15 @@ The LLMs I used in this project were developed by some of the Chinese AI compani
 
 ![RTX 4090D 48GB](/static/redlm/RTX4090D.jpg)
 
-Also, the team behind NVIDIA's TensorRT-LLM seems to be mostly Chinese NVIDIA employees in Beijing (from my observations of GitHub contributor profiles). This might be why the TensorRT-LLM LLM API has such good support for Chinese language models! I recommend the [Dwarkesh Patel podcast episode with @Asianometry and Dylan Patel of Semianalysis](https://www.youtube.com/watch?v=pE3KKUKXcTM) for interesting look at China's role in the semiconductor industry.
-
-NVIDIA recently concluded it's AI Summit in Mumbai. I was intrigued by the fact that Hindi has unique challenges that have have limited the development of Hindi LLMs compared to the development of English and Chinese LLMs. In a conversation with Jensen Huang, Indian industrial titan and CEO of Reliance Industries Mukesh Ambani spoke about his aspirations and ambition for India to overcome these challenges and develop a Hindi LLM. In a viral moment Mukesh Ambani shared that through devotion to attaining knowledge through the Hindu Goddess of knowledge Sarawati, India will be met by the Goddess of prosperity, Lakshmi. Just a few days later [NVIDIA Unveils Nemotron-4-Mini-Hindi-4B: AI for India's 500 Million Hindi Speakers](https://indiaai.gov.in/article/nvidia-unveils-nemotron-4-mini-hindi-4b-ai-for-india-s-500-million-hindi-speakers).
+NVIDIA recently concluded it's AI Summit in Mumbai. I was intrigued by the fact that Hindi has unique challenges that have have limited the development of Hindi LLMs compared to the development of English and Chinese LLMs. In a conversation with Jensen Huang, Indian industrial titan and CEO of Reliance Industries Mukesh Ambani spoke about his aspirations and ambition for India to overcome these challenges and develop a Hindi LLM. In a viral moment Mukesh Ambani shared that through devotion to attaining knowledge through the Hindu Goddess of knowledge Sarawati, India will be met by the Goddess of prosperity, Lakshmi.
 
 ![Mukesh Ambani](/static/redlm/mukesh_ambani.png)
 
-Hindi LLMs could enable applications to explore important works of literature from India. A comparable work of literature in size and cultural significance might be the Ramayana.
+NVIDIA recently released a small language model for Hindi at the AI Summit in Mumbai called  [Nemotron-4-Mini-Hindi-4B](https://indiaai.gov.in/article/nvidia-unveils-nemotron-4-mini-hindi-4b-ai-for-india-s-500-million-hindi-speakers). Hindi LLMs could enable applications to explore important works of literature from India. I don't know that much about India literature, but a comparable work of literature in size and cultural significance might be the Ramayana.
 
-The Ramayana is an ancient Indian epic that tells the story of Prince Rama's heroic quest to rescue his wife, Sita, who has been kidnapped by the demon king Ravana. Set in a world of gods, demons, and celestial beings, the story explores themes of duty, loyalty, and the triumph of good over evil. Guided by wisdom, strength, and the support of devoted allies like Hanuman, the monkey god, and his brother Lakshmana, Rama's journey is a deeply spiritual tale, celebrated for its poetic beauty and moral depth. The Ramayana continues to inspire and captivate audiences across cultures.
+*The Ramayana is an ancient Indian epic that tells the story of Prince Rama's heroic quest to rescue his wife, Sita, who has been kidnapped by the demon king Ravana. Set in a world of gods, demons, and celestial beings, the story explores themes of duty, loyalty, and the triumph of good over evil. Guided by wisdom, strength, and the support of devoted allies like Hanuman, the monkey god, and his brother Lakshmana, Rama's journey is a deeply spiritual tale, celebrated for its poetic beauty and moral depth. The Ramayana continues to inspire and captivate audiences across cultures.*
 
-The Ramayana story journeyed to Thailand centuries ago, transforming into the Ramakien, a Thai adaptation that retains the essence of the original Indian epic while adding distinctive Thai cultural elements. Introduced through trade, diplomacy, and cultural exchange between India and Southeast Asia, the story became deeply woven into Thailand’s art, literature, and performance traditions. Thai kings, particularly King Rama I, adapted and documented the Ramakien, giving it a prominent place in Thai history. Lavishly detailed murals surrounding the Temple of the Emerald Buddha in Bangkok’s Grand Palace depict the Ramakien in over 178 panels that totaling over 2 kilometers in length. On a recent visit to the Grand Palace, I imagined having an application that could link the detailed murals to elements of the story.
+The Ramayana story journeyed to Thailand centuries ago, transforming into the Ramakien, a Thai adaptation that retains the essence of the original Indian epic while adding distinctive Thai cultural elements. Introduced through trade, diplomacy, and cultural exchange between India and Southeast Asia, the story became deeply woven into Thailand’s art, literature, and performance traditions. Thai kings, particularly King Rama I, adapted and documented the Ramakien, giving it a prominent place in Thai history. Lavishly detailed murals surrounding the Temple of the Emerald Buddha in Bangkok’s Grand Palace depict the Ramakien in over 178 panels that totaling over 2 kilometers in length. On a recent visit to the Grand Palace, I imagined having an application that could link the detailed murals to elements of the story in Hindi, Thai, English, Chinese or any language.
 
 ![Ramakien murals surrounding Temple of the Emerald Buddha](/static/redlm/ramakien.png)
 
