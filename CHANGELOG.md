@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.10.0](https://github.com/briancaffey/RedLM/compare/v0.9.0...v0.10.0) (2024-11-09)
+
+
+### Features
+
+* **article:** add section about redlm deep dive video ([5ed0c85](https://github.com/briancaffey/RedLM/commit/5ed0c8569985405c428d4754b1b5c3bb86f3a8c6))
+* **article:** expand section about llamaindex and add paragraph on LLMRerank ([7dac701](https://github.com/briancaffey/RedLM/commit/7dac70155ffccbaa128c768416d7ff318c644792))
+* **article:** reword article, add links ([03384f0](https://github.com/briancaffey/RedLM/commit/03384f00b5c96d1b2c0d0dec1bd9a5e1227c8bc3))
+* **docker:** update docker and docker compose configuration and documentation in readme ([5c6c80e](https://github.com/briancaffey/RedLM/commit/5c6c80e473e7a64cedb99a43e34d775151b53163))
+* **nginx:** add nginx config for running api and ui on same domain ([9af720c](https://github.com/briancaffey/RedLM/commit/9af720c5b36a33358bd35df49773c8941573d0ea))
+* **rag:** rector CustomQueryEngine, add observability with langfuse, fix issues with PromptTemplates and RAG logic ([0133cd3](https://github.com/briancaffey/RedLM/commit/0133cd389dc5a669fb78fdc3444a4b387e31264f))
+* **readme:** update readme instructions and add section about redlm features ([0a3d072](https://github.com/briancaffey/RedLM/commit/0a3d072906128268ac5cd109e8e42b3f6b421a06))
+* **workflow:** fully integrate llama-indeex workflows into FastAPI application ([5003174](https://github.com/briancaffey/RedLM/commit/50031747378cb8aa6ed632ca201cfb1fce95c199))
+* **workflows:** add workflow for rag Q&A bot using rerank ([bccd6e6](https://github.com/briancaffey/RedLM/commit/bccd6e6221ccd2d3932165470965544c06a5ebff))
+
+
+### Bug Fixes
+
+* **black:** format code with black ([a7c7b35](https://github.com/briancaffey/RedLM/commit/a7c7b35fd31458d6c87254ef93f2a789eb0d6b56))
+* **typo:** fix typo in logging ([1e5427b](https://github.com/briancaffey/RedLM/commit/1e5427b1ece1fbd299b437684e16b4d52aa4ef45))
+* **workflows:** filter index by chapter when processing image Q&A requests ([9182f3b](https://github.com/briancaffey/RedLM/commit/9182f3bfb66481171bc000769c1103b165bf5943))
+
 ## [0.9.0](https://github.com/briancaffey/RedLM/compare/v0.8.0...v0.9.0) (2024-11-04)
 
 
