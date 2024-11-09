@@ -5,6 +5,7 @@ from llama_index.utils.workflow import draw_all_possible_flows
 
 from llama_index.core.postprocessor.llm_rerank import LLMRerank
 from llama_index.core.indices.utils import default_parse_choice_select_answer_fn
+from llama_index.core.vector_stores import ExactMatchFilter, MetadataFilters
 from llama_index.core.workflow import (
     Context,
     Workflow,
@@ -124,8 +125,13 @@ class RAGWorkflow(Workflow):
         # query = ev.get("query")
         query = ev.query
         image_description = await ctx.get("image_description", default=None)
-
-        if image_description:
+        chapter_number = await ctx.get("chapter_number", default=None)
+        filters = MetadataFilters(filters=[])
+        if image_description and chapter_number:
+            logger.info(f"🗂️Filtering index by chapter number {chapter_number}")
+            filters = MetadataFilters(
+                filters=[ExactMatchFilter(key="chapter", value=str(chapter_number))]
+            )
             query = image_description
 
         logger.info(f"🧮Query the vector database with: {query}")
@@ -141,7 +147,7 @@ class RAGWorkflow(Workflow):
             return None
 
         # get the four most relevant nodes base on cosine similarity
-        retriever = index.as_retriever(similarity_top_k=4)
+        retriever = index.as_retriever(similarity_top_k=4, filters=filters)
         nodes = await retriever.aretrieve(query)
         logger.info(f"📐Retrieved {len(nodes)} nodes.")
         return RetrieverEvent(nodes=nodes)
@@ -182,8 +188,10 @@ class RAGWorkflow(Workflow):
 
         # https://github.com/run-llama/llama_index/issues/15748
         # https://github.com/run-llama/llama_index/pull/16756/commits/02b9b133b5c80a17d0385814a1d49810be0217d1
+        # do inferences
         if image_description_ctx is not None:
             image_description = image_description_ctx
+            # qa_query_engine = get_query_engine_for_multi_modal(filters=filters)
         else:
             image_description = None
 

@@ -111,7 +111,7 @@ The chapter page displays all of the chapter's associated images at the top of t
 
 Click on one of the smaller images at the top of the page to ask a question about the painting.
 
-![RedLM Image Q&A](/static/redlm/image_qa_example.png)
+![RedLM Image Q&A](/static/redlm/stone_story_analysis.png)
 
 Click and drag on a portion of the image and then enter a query in the text box below about that part of the image. The response is displayed in the red text box, and references used by Retrieval Augmented Generation system can be viewed by hovering over the green badges below the response. Hovering over the gray badge will display the original description of the image based on your question (without using reference material from the book). The response (in the red dialog box) incorporates the referenced passages and the image description in a custom prompt and attempts to explain the content of the image in the context of the image's associated chapter. This means that only paragraphs from the painting's associated chapter will be used to generate the response.
 
@@ -225,3 +225,7 @@ docker run --runtime nvidia --gpus all \
     --ipc=host \
     briancaffey/qwen2-vl:latest
 ```
+
+### Local inference with Kubernetes, microk8s and kustomize on RTX PCs
+
+See the `k8s` directory in this repo for an experimental setup for running the LLM and VLM locally in a local kubernetes cluster using microk8s and kustomize with RTX PC nodes.
